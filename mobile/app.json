@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "gojo",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.koryis.gojo",
