@@ -38,7 +38,11 @@ export function matchSavedPlace(
   return best?.name ?? null;
 }
 
-/** Bounding box that comfortably contains every point, for the initial camera. */
+/**
+ * Bounding box that contains every point, for the initial map camera.
+ * `bounds` is a MapLibre LngLatBounds tuple: [west, south, east, north].
+ * `center` is [lng, lat].
+ */
 export function boundsOf(points: { lat: number; lng: number }[]) {
   if (points.length === 0) return null;
   let minLat = 90,
@@ -52,8 +56,7 @@ export function boundsOf(points: { lat: number; lng: number }[]) {
     maxLng = Math.max(maxLng, p.lng);
   }
   return {
-    ne: [maxLng, maxLat] as [number, number],
-    sw: [minLng, minLat] as [number, number],
+    bounds: [minLng, minLat, maxLng, maxLat] as [number, number, number, number],
     center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2] as [number, number],
   };
 }

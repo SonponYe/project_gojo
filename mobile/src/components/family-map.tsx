@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function FamilyMap({ roster, myId, selectedId, onSelect, fitToken }: Props) {
-  const cameraRef = useRef<any>(null);
+  const cameraRef = useRef<import('@maplibre/maplibre-react-native').CameraRef>(null);
 
   const points = useMemo(
     () =>
@@ -38,35 +38,34 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, fitToken }: Prop
     [roster],
   );
 
-  const bounds = useMemo(() => boundsOf(points), [points]);
+  const box = useMemo(() => boundsOf(points), [points]);
 
   useEffect(() => {
-    if (!cameraRef.current || !bounds) return;
+    if (!cameraRef.current || !box) return;
     if (points.length === 1) {
-      cameraRef.current.setCamera({
-        centerCoordinate: bounds.center,
-        zoomLevel: 14,
-        animationDuration: 600,
-      });
+      cameraRef.current.flyTo({ center: box.center, zoom: 14, duration: 600 });
     } else {
-      cameraRef.current.fitBounds(bounds.ne, bounds.sw, [80, 60, 160, 60], 600);
+      cameraRef.current.fitBounds(box.bounds, {
+        padding: { top: 90, bottom: 260, left: 60, right: 60 },
+        duration: 600,
+      });
     }
-  }, [bounds, points.length, fitToken]);
+  }, [box, points.length, fitToken]);
 
   if (!MapLibre) {
     return (
       <View style={styles.fallback}>
         <Text style={styles.fallbackText}>
-          Map needs a development build.{'\n'}Run `npx expo run:android` / `run:ios`.
+          Map needs a development build.{'\n'}Run `npm run android` / `npm run ios`.
         </Text>
       </View>
     );
   }
 
-  const { MapView, Camera, MarkerView } = MapLibre;
+  const { Map, Camera, Marker } = MapLibre;
 
   return (
-    <MapView style={StyleSheet.absoluteFill} mapStyle={Config.mapStyleUrl} logoEnabled={false}>
+    <Map style={StyleSheet.absoluteFill} mapStyle={Config.mapStyleUrl} logo={false}>
       <Camera ref={cameraRef} />
       {roster.map((m) => {
         if (!m.location) return null;
@@ -75,13 +74,12 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, fitToken }: Prop
         const isMe = m.user.id === myId;
         const label = m.location.place_name ?? m.user.name;
         return (
-          <MarkerView
+          <Marker
             key={m.user.id}
-            coordinate={[m.location.longitude, m.location.latitude]}
-            anchor={{ x: 0.5, y: 1 }}>
-            <View
-              style={[styles.pin, selectedId === m.user.id && styles.pinSelected]}
-              onTouchEnd={() => onSelect(m.user.id)}>
+            lngLat={[m.location.longitude, m.location.latitude]}
+            anchor="bottom"
+            onPress={() => onSelect(m.user.id)}>
+            <View style={[styles.pin, selectedId === m.user.id && styles.pinSelected]}>
               <View style={styles.pinRow}>
                 <Avatar name={m.user.name} url={m.user.avatar_url} color={color} size={26} />
                 <Text numberOfLines={1} style={styles.pinLabel}>
@@ -89,12 +87,12 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, fitToken }: Prop
                 </Text>
                 <StatusDot freshness={fresh} />
               </View>
-              <View style={[styles.pinStem, { borderTopColor: '#fff' }]} />
+              <View style={styles.pinStem} />
             </View>
-          </MarkerView>
+          </Marker>
         );
       })}
-    </MapView>
+    </Map>
   );
 }
 
@@ -107,9 +105,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8EAF2',
   },
   fallbackText: { color: Palette.textDim, textAlign: 'center', fontSize: 14, lineHeight: 20 },
-  pin: {
-    alignItems: 'center',
-  },
+  pin: { alignItems: 'center' },
   pinRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -139,6 +135,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 7,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
+    borderTopColor: '#fff',
     marginTop: -1,
   },
 });
