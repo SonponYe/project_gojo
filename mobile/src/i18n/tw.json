@@ -1,0 +1,22 @@
+{
+  "_note": "Twi covers the six phrases that matter most for members least comfortable with English (spec §10.5). Everything else falls back to English.",
+  "common": {
+    "youSafe": "Wo ho te ase",
+    "turnOff": "Tua mu"
+  },
+  "map": {
+    "lastSeen": "Ɛberɛ a wohu no",
+    "sos": "Mehia mmoa",
+    "imOk": "Wo ho te ase"
+  },
+  "chat": {
+    "title": "Abusua kuw"
+  },
+  "profile": {
+    "trackingOn": "Ɛkae baabi a wowɔ hɔ"
+  },
+  "notifications": {
+    "foregroundServiceTitle": "Ɛkae baabi a wowɔ hɔ",
+    "sosBody": "{{name}} hia mmoa!"
+  }
+}

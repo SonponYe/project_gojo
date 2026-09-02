@@ -1,0 +1,113 @@
+{
+  "app": {
+    "name": "Gojo",
+    "tagline": "Family Location & Safety"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "done": "Done",
+    "delete": "Delete",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "youSafe": "You're safe",
+    "turnOff": "Turn off",
+    "turnOn": "Turn on"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Your name",
+    "haveAccount": "Already have an account? Sign in",
+    "noAccount": "New to Gojo? Create an account",
+    "continue": "Continue",
+    "checkEmail": "Check your email to confirm your account, then sign in.",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "onboarding": {
+    "title": "Join your family",
+    "subtitle": "Enter the invite code a family member shared with you, or start a new family group.",
+    "inviteCode": "Invite code",
+    "join": "Join family",
+    "createTitle": "Start a new family",
+    "familyName": "Family name",
+    "create": "Create family",
+    "consentTitle": "Before you join",
+    "consentBody": "Joining this group means your family can see your location. They can also see yours.",
+    "consentAccept": "I understand — join",
+    "invalidCode": "That invite code doesn't match any family."
+  },
+  "tabs": {
+    "map": "Map",
+    "chat": "Chat",
+    "me": "Me"
+  },
+  "map": {
+    "title": "Family",
+    "empty": "No one is sharing their location yet.",
+    "you": "You",
+    "recenter": "Show everyone",
+    "lastSeen": "Last seen",
+    "live": "Live",
+    "offline": "Offline",
+    "approxAddress": "Approximate address",
+    "battery": "Battery",
+    "signal": "Signal",
+    "openInMaps": "Open in Maps",
+    "sos": "SOS",
+    "sosHold": "Hold to send",
+    "sosSending": "Sending…",
+    "sosActive": "SOS active",
+    "imOk": "I'm OK",
+    "sosBannerOne": "{{name}} needs help!",
+    "sosBannerMany": "{{count}} family members need help"
+  },
+  "chat": {
+    "title": "Family group",
+    "placeholder": "Message your family…",
+    "send": "Send",
+    "shareLocation": "Share my location",
+    "locationCard": "📍 Shared a location",
+    "openLocation": "Open on map",
+    "empty": "Say hello to your family."
+  },
+  "profile": {
+    "title": "Me",
+    "tracking": "Location sharing",
+    "trackingOn": "Location sharing active",
+    "trackingOff": "Location sharing is off",
+    "trackingHelp": "When on, Gojo shares your live location with your family — even when the app is closed. Turn it off any time; your pin disappears immediately.",
+    "inviteTitle": "Family invite code",
+    "inviteHelp": "Share this code so a family member can join.",
+    "regenerate": "Regenerate code",
+    "copied": "Copied",
+    "places": "Named places",
+    "placesHelp": "Home, School, Work… your pin shows the name instead of an address. Only you can see these.",
+    "addPlace": "Add a place",
+    "placeName": "Name (e.g. Home)",
+    "radius": "Radius",
+    "meters": "{{value}} m",
+    "maxPlaces": "You can save up to 10 places.",
+    "language": "Language",
+    "languageSystem": "Follow device",
+    "signOut": "Sign out",
+    "leaveFamily": "Leave family",
+    "leaveConfirm": "Leave this family? Your pin and messages stop syncing.",
+    "permissionTitle": "Location permission needed",
+    "permissionBody": "Gojo needs \"Always\" location access to keep your family updated while the app is closed. Open Settings to allow it.",
+    "openSettings": "Open Settings"
+  },
+  "notifications": {
+    "awarenessTitle": "Gojo is watching you aii 👀",
+    "awarenessBody": "Your location is being shared with your family group.",
+    "foregroundServiceTitle": "Location sharing active",
+    "foregroundServiceBody": "Your family can see your location.",
+    "sosTitle": "Gojo — SOS alert",
+    "sosBody": "{{name}} needs help! Tap to open their location.",
+    "channelDefault": "General",
+    "channelSos": "SOS alerts",
+    "channelChat": "Messages"
+  }
+}

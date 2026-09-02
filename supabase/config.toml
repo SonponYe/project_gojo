@@ -1,0 +1,10 @@
+project_id = "gojo"
+
+[functions.sos-alert]
+verify_jwt = false   # we verify the caller's token manually inside the function
+
+[functions.notify-message]
+verify_jwt = false   # called by the DB trigger with the service role key
+
+[db]
+major_version = 17
