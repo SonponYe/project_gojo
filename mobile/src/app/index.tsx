@@ -6,9 +6,9 @@ import { Palette } from '../components/ui';
 
 /** Entry gate — route by auth + family state (spec: no dashboards, straight in). */
 export default function Index() {
-  const { initializing, session, profile } = useAuth();
+  const { initializing, ready, session, profile } = useAuth();
 
-  if (initializing) {
+  if (initializing || !ready) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Palette.bg }}>
         <ActivityIndicator color={Palette.brand} size="large" />

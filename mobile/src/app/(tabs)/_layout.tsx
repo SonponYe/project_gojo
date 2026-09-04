@@ -10,9 +10,9 @@ function Icon({ glyph, color }: { glyph: string; color: ColorValue }) {
 }
 
 export default function TabsLayout() {
-  const { initializing, session, profile } = useAuth();
+  const { initializing, ready, session, profile } = useAuth();
 
-  if (initializing) return null;
+  if (initializing || !ready) return null;
   if (!session) return <Redirect href="/(auth)/sign-in" />;
   if (!profile?.family_id) return <Redirect href="/(auth)/join-family" />;
 

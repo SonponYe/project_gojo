@@ -16,7 +16,16 @@ import { resumeTrackingIfEnabled } from '../lib/tracking';
 import { supabase } from '../lib/supabase';
 
 interface AuthState {
+  /** True until the very first session check resolves (splash spinner). */
   initializing: boolean;
+  /**
+   * True once `profile`/`family` reflect the *current* `session` (false again
+   * for the moment after sign-in/sign-out while the next profile is loading).
+   * Route gates should wait for this before deciding where to send the user —
+   * otherwise a fresh sign-in can strand you on the sign-in screen because
+   * nothing re-evaluates "do I have a family yet?" once you're already on it.
+   */
+  ready: boolean;
   session: Session | null;
   profile: AppUser | null;
   family: Family | null;
@@ -32,6 +41,7 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [initializing, setInitializing] = useState(true);
+  const [ready, setReady] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<AppUser | null>(null);
   const [family, setFamily] = useState<Family | null>(null);
@@ -67,9 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       if (data.session?.user.id) await loadProfile(data.session.user.id);
       setInitializing(false);
+      setReady(true);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (_event, next) => {
+      setReady(false); // a route gate mid-transition should wait, not guess
       setSession(next);
       if (next?.user.id) {
         await loadProfile(next.user.id);
@@ -79,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
         setFamily(null);
       }
+      setReady(true);
     });
     return () => sub.subscription.unsubscribe();
   }, [loadProfile]);
@@ -118,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthState>(
     () => ({
       initializing,
+      ready,
       session,
       profile,
       family,
@@ -130,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }),
     [
       initializing,
+      ready,
       session,
       profile,
       family,

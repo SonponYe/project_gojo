@@ -3,11 +3,17 @@ import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '../../context/auth';
 
 export default function AuthLayout() {
-  const { initializing, session, profile } = useAuth();
+  const { initializing, ready, session, profile } = useAuth();
 
-  // Signed in and already in a family → the app proper.
-  if (!initializing && session && profile?.family_id) {
-    return <Redirect href="/(tabs)" />;
+  // Wait for the *current* session's profile before deciding where to send the
+  // user — otherwise a fresh sign-in/sign-up can strand you on this screen
+  // (session exists, but nothing re-evaluates "where do I belong now?").
+  if (!initializing && ready && session) {
+    return profile?.family_id ? (
+      <Redirect href="/(tabs)" />
+    ) : (
+      <Redirect href="/(auth)/join-family" />
+    );
   }
 
   return (
