@@ -52,6 +52,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
 /** Register this device's Expo push token against the signed-in user row. */
 export async function registerPushToken(): Promise<void> {
   try {
+    // Web push needs a VAPID key we don't configure; native-only for now.
+    if (Platform.OS === 'web') return;
     if (!Device.isDevice) return; // simulators can't get a push token
     if (!(await requestNotificationPermission())) return;
 
