@@ -38,18 +38,20 @@ supabase link --project-ref qevscpmifoqkkfiysynx
 supabase db push
 ```
 
-### Still to do — deploy the two Edge Functions
-Needs a Supabase login (`supabase login`), which is interactive:
+### Edge Functions — deployed ✓
+`sos-alert` and `notify-message` are live on `qevscpmifoqkkfiysynx` (both
+`verify_jwt=false`; they check auth themselves). Redeploy after edits:
 ```bash
-cd supabase
-supabase functions deploy sos-alert     --project-ref qevscpmifoqkkfiysynx
-supabase functions deploy notify-message --project-ref qevscpmifoqkkfiysynx
+export SUPABASE_ACCESS_TOKEN=...           # from supabase/.env (gitignored)
+npx supabase functions deploy sos-alert      --project-ref qevscpmifoqkkfiysynx --no-verify-jwt
+npx supabase functions deploy notify-message --project-ref qevscpmifoqkkfiysynx --no-verify-jwt
 ```
-The app works without them: **SOS falls back to a direct insert** (family members
-with the app open still get the red alert via realtime; only push to a *closed*
-app is lost). `notify-message` is likewise only closed-app chat push.
+`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are auto-injected into the runtime.
+The app also degrades gracefully without them: **SOS falls back to a direct
+insert** (online family still get the realtime red alert; only closed-app push is
+lost), and `notify-message` is only closed-app chat push.
 
-To turn the chat webhook on afterwards, set (Dashboard → Database → Settings):
+To turn the chat webhook on, set (Dashboard → Database → Settings):
 ```sql
 alter database postgres set app.settings.functions_base_url =
   'https://qevscpmifoqkkfiysynx.supabase.co/functions/v1';
