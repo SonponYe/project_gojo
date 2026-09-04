@@ -4,7 +4,7 @@
 //   1. authenticates the caller from their JWT,
 //   2. writes one row to public.sos_alerts,
 //   3. fans an urgent push out to every other member of the family,
-// all in a single call — target end-to-end latency < 2s.
+// all in a single call, target end-to-end latency < 2s.
 //
 // POST /functions/v1/sos-alert
 //   headers: Authorization: Bearer <user access token>
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     .filter((r) => !!r.push_token)
     .map((r) => ({
       to: r.push_token as string,
-      title: "Gojo — SOS alert",
+      title: "Gojo: SOS alert",
       body: `${name} needs help! Tap to open their location.`,
       sound: "default",
       priority: "high",

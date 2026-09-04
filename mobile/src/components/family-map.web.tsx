@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { MemberWithLocation } from '../lib/database.types';
@@ -23,9 +24,8 @@ export function FamilyMap({ roster, myId, selectedId, onSelect }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.notice}>
-        <Text style={styles.noticeText}>
-          🗺️ Map view is native-only — showing a list on web.
-        </Text>
+        <Ionicons name="map-outline" size={16} color={Palette.brand} />
+        <Text style={styles.noticeText}>Map view is native-only, showing a list on web.</Text>
       </View>
       <ScrollView contentContainerStyle={styles.list}>
         {withLoc.map((m) => {
@@ -61,7 +61,14 @@ export function FamilyMap({ roster, myId, selectedId, onSelect }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: '#E8EAF2' },
-  notice: { padding: 12, backgroundColor: Palette.brandSoft },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    padding: 12,
+    backgroundColor: Palette.brandSoft,
+  },
   noticeText: { color: Palette.brand, fontWeight: '700', textAlign: 'center' },
   list: { padding: 12, gap: 8 },
   row: {

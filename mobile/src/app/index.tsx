@@ -4,7 +4,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/auth';
 import { Palette } from '../components/ui';
 
-/** Entry gate — route by auth + family state (spec: no dashboards, straight in). */
+/** Entry gate, route by auth + family state (spec: no dashboards, straight in). */
 export default function Index() {
   const { initializing, ready, session, profile } = useAuth();
 

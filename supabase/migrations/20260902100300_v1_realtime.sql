@@ -1,5 +1,5 @@
 -- Gojo · v1.0 realtime
--- Map pins and chat update over Supabase Realtime — no polling.
+-- Map pins and chat update over Supabase Realtime, no polling.
 
 -- REPLICA IDENTITY FULL so UPDATE events on locations carry the full new row
 -- (locations is upserted in place on every GPS fix).

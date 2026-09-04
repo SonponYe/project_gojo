@@ -40,7 +40,7 @@ create index if not exists users_family_id_idx on public.users (family_id);
 
 comment on table public.users is 'App profile row, 1:1 with auth.users. Created automatically on sign-up.';
 comment on column public.users.is_sharing is 'Master tracking toggle. When false the pin disappears from all family maps.';
-comment on column public.users.consent_accepted_at is 'Safety Layer 1 — when the user accepted the "your family can see your location" screen.';
+comment on column public.users.consent_accepted_at is 'Safety Layer 1, when the user accepted the "your family can see your location" screen.';
 
 -- ---------------------------------------------------------------------------
 -- locations  (exactly one row per user, updated in place on every GPS fix)

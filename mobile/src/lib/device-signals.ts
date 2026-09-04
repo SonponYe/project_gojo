@@ -1,4 +1,4 @@
-// Spec §10.1 / §10.2 — battery level and connectivity type, sampled on every
+// Spec §10.1 / §10.2, battery level and connectivity type, sampled on every
 // location update. Both are best-effort: failures degrade to null / 'unknown',
 // never throw (this runs inside the background task).
 
@@ -46,5 +46,5 @@ export const SIGNAL_LABEL: Record<SignalType, string> = {
   '3g': '3G',
   '2g': '2G',
   none: 'No signal',
-  unknown: '—',
+  unknown: 'N/A',
 };

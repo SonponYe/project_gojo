@@ -36,7 +36,7 @@
     "create": "Create family",
     "consentTitle": "Before you join",
     "consentBody": "Joining this group means your family can see your location. They can also see yours.",
-    "consentAccept": "I understand — join",
+    "consentAccept": "I understand and agree to join",
     "invalidCode": "That invite code doesn't match any family."
   },
   "tabs": {
@@ -69,7 +69,7 @@
     "placeholder": "Message your family…",
     "send": "Send",
     "shareLocation": "Share my location",
-    "locationCard": "📍 Shared a location",
+    "locationCard": "Shared a location",
     "openLocation": "Open on map",
     "empty": "Say hello to your family."
   },
@@ -78,7 +78,7 @@
     "tracking": "Location sharing",
     "trackingOn": "Location sharing active",
     "trackingOff": "Location sharing is off",
-    "trackingHelp": "When on, Gojo shares your live location with your family — even when the app is closed. Turn it off any time; your pin disappears immediately.",
+    "trackingHelp": "When on, Gojo shares your live location with your family, even when the app is closed. Turn it off any time; your pin disappears immediately.",
     "inviteTitle": "Family invite code",
     "inviteHelp": "Share this code so a family member can join.",
     "regenerate": "Regenerate code",
@@ -104,7 +104,7 @@
     "awarenessBody": "Your location is being shared with your family group.",
     "foregroundServiceTitle": "Location sharing active",
     "foregroundServiceBody": "Your family can see your location.",
-    "sosTitle": "Gojo — SOS alert",
+    "sosTitle": "Gojo: SOS alert",
     "sosBody": "{{name}} needs help! Tap to open their location.",
     "channelDefault": "General",
     "channelSos": "SOS alerts",

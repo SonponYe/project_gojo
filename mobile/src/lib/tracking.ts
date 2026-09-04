@@ -1,4 +1,4 @@
-// Spec §3 — turning the master toggle on/off. This is the only place that
+// Spec §3, turning the master toggle on/off. This is the only place that
 // starts or stops the OS-level location task.
 
 import * as Location from 'expo-location';
@@ -50,7 +50,7 @@ export async function startTracking(): Promise<PermissionResult> {
 
   await supabase.from('users').update({ is_sharing: true }).eq('id', uid);
 
-  // Web has no background task / foreground service / local scheduling — we can
+  // Web has no background task / foreground service / local scheduling, we can
   // still push a one-off position from the browser geolocation API.
   if (!IS_WEB) {
     if (!(await isTrackingRunning())) {
@@ -61,7 +61,7 @@ export async function startTracking(): Promise<PermissionResult> {
         pausesUpdatesAutomatically: false,
         showsBackgroundLocationIndicator: true,
         foregroundService: {
-          // Spec §4 Layer 3 — the OS-enforced persistent banner.
+          // Spec §4 Layer 3, the OS-enforced persistent banner.
           notificationTitle: t('notifications.foregroundServiceTitle'),
           notificationBody: t('notifications.foregroundServiceBody'),
           notificationColor: '#0A0A0C',
@@ -76,7 +76,7 @@ export async function startTracking(): Promise<PermissionResult> {
 }
 
 /**
- * Stop sharing — spec §4 Layer 5: instant, no confirmation, no notification to
+ * Stop sharing, spec §4 Layer 5: instant, no confirmation, no notification to
  * anyone. Pin vanishes because we both flip the flag and delete the row.
  */
 export async function stopTracking(): Promise<void> {
@@ -144,6 +144,6 @@ async function writeImmediateFix(uid: string): Promise<void> {
       { onConflict: 'user_id' },
     );
   } catch {
-    // no fix yet — the background task will deliver one shortly
+    // no fix yet, the background task will deliver one shortly
   }
 }

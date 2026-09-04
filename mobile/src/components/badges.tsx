@@ -5,7 +5,7 @@ import type { SignalType } from '../lib/database.types';
 import { batteryColor, batteryPercent, FRESHNESS_COLOR, initialsOf, type Freshness } from '../lib/format';
 import { Palette } from './ui';
 
-/** Spec §2.1 — green / amber / grey freshness dot. */
+/** Spec §2.1, green / amber / grey freshness dot. */
 export function StatusDot({ freshness, size = 10 }: { freshness: Freshness; size?: number }) {
   return (
     <View
@@ -21,7 +21,7 @@ export function StatusDot({ freshness, size = 10 }: { freshness: Freshness; size
   );
 }
 
-/** Spec §10.1 — coloured battery indicator. */
+/** Spec §10.1, coloured battery indicator. */
 export function BatteryBadge({ level }: { level: number | null | undefined }) {
   const color = batteryColor(level);
   return (
@@ -41,7 +41,7 @@ export function BatteryBadge({ level }: { level: number | null | undefined }) {
   );
 }
 
-/** Spec §10.2 — connectivity type. */
+/** Spec §10.2, connectivity type. */
 export function SignalBadge({ type }: { type: SignalType | null | undefined }) {
   const t = type ?? 'unknown';
   const color = t === 'none' ? Palette.danger : t === '2g' ? '#F59E0B' : Palette.textDim;

@@ -1,12 +1,25 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Redirect, Tabs } from 'expo-router';
-import { Text, type ColorValue } from 'react-native';
+import type { ColorValue } from 'react-native';
 
 import { useAuth } from '../../context/auth';
 import { t } from '../../i18n';
 import { Palette } from '../../components/ui';
 
-function Icon({ glyph, color }: { glyph: string; color: ColorValue }) {
-  return <Text style={{ fontSize: 22, color }}>{glyph}</Text>;
+// Filled glyph when the tab is active, outline otherwise, a standard iOS/
+// Material convention that reads as more deliberate than a flat icon set.
+function TabIcon({
+  focused,
+  filled,
+  outline,
+  color,
+}: {
+  focused: boolean;
+  filled: keyof typeof Ionicons.glyphMap;
+  outline: keyof typeof Ionicons.glyphMap;
+  color: ColorValue;
+}) {
+  return <Ionicons name={focused ? filled : outline} size={24} color={color} />;
 }
 
 export default function TabsLayout() {
@@ -28,21 +41,37 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.map'),
-          tabBarIcon: ({ color }) => <Icon glyph="🗺️" color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon focused={focused} filled="map" outline="map-outline" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
           title: t('tabs.chat'),
-          tabBarIcon: ({ color }) => <Icon glyph="💬" color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon
+              focused={focused}
+              filled="chatbubble-ellipses"
+              outline="chatbubble-ellipses-outline"
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.me'),
-          tabBarIcon: ({ color }) => <Icon glyph="👤" color={color} />,
+          tabBarIcon: ({ focused, color }) => (
+            <TabIcon
+              focused={focused}
+              filled="person-circle"
+              outline="person-circle-outline"
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>

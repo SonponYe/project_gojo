@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 // Monochrome "black & white" theme. Danger (SOS) and ok (sharing-on) stay red/
-// green on purpose — those are safety-status colours, not branding.
+// green on purpose, those are safety-status colours, not branding.
 export const Palette = {
   brand: '#0A0A0C',
   brandSoft: '#F0F0F2',

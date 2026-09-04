@@ -4,7 +4,7 @@ import { Animated, Easing, Pressable, StyleSheet, Text, Vibration, View } from '
 import { t } from '../i18n';
 import { Palette } from './ui';
 
-const HOLD_MS = 2000; // spec §10.3 — 2-second hold guards against accidental triggers
+const HOLD_MS = 2000; // spec §10.3, 2-second hold guards against accidental triggers
 
 /**
  * Large red SOS control for the pin card. Fires `onTrigger` only after a full

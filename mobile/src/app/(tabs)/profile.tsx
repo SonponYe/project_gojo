@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Location from 'expo-location';
 import {
@@ -47,7 +48,7 @@ export default function ProfileScreen() {
           setPermBlocked(true);
         }
       } else {
-        await stopTracking(); // spec §4 Layer 5 — instant, no confirm
+        await stopTracking(); // spec §4 Layer 5, instant, no confirm
       }
     } finally {
       await refreshProfile();
@@ -135,7 +136,7 @@ export default function ProfileScreen() {
         <Card>
           <Text style={styles.help}>{t('profile.inviteHelp')}</Text>
           <Pressable onPress={copyCode} style={styles.codeBox}>
-            <Text style={styles.code}>{family?.invite_code ?? '—'}</Text>
+            <Text style={styles.code}>{family?.invite_code ?? 'N/A'}</Text>
             <Text style={styles.codeHint}>{copied ? t('profile.copied') : 'Tap to copy'}</Text>
           </Pressable>
           <Pressable onPress={regenerate}>
@@ -149,10 +150,11 @@ export default function ProfileScreen() {
           <Text style={styles.help}>{t('profile.placesHelp')}</Text>
           {places.map((p) => (
             <View key={p.id} style={styles.placeRow}>
-              <Text style={styles.placeName}>📍 {p.name}</Text>
+              <Ionicons name="location" size={16} color={Palette.brand} />
+              <Text style={styles.placeName}>{p.name}</Text>
               <Text style={styles.placeMeta}>{t('profile.meters', { value: p.radius_m })}</Text>
               <Pressable onPress={() => removePlace(p.id)} hitSlop={8}>
-                <Text style={styles.placeDelete}>✕</Text>
+                <Ionicons name="close" size={16} color={Palette.danger} />
               </Pressable>
             </View>
           ))}
@@ -245,7 +247,6 @@ const styles = StyleSheet.create({
   placeRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
   placeName: { flex: 1, fontWeight: '700', color: Palette.text },
   placeMeta: { color: Palette.textDim, fontWeight: '600', fontSize: 13 },
-  placeDelete: { color: Palette.danger, fontWeight: '900', fontSize: 16 },
   langRow: {
     flexDirection: 'row',
     alignItems: 'center',

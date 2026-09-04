@@ -1,4 +1,4 @@
-# Gojo — Family Location & Safety App
+# Gojo, Family Location & Safety App
 
 Always-on family location sharing, last-known-location when offline, and a
 lightweight family group chat. Built from `Gojo_App_Description.docx` (v1) and
@@ -18,7 +18,7 @@ project_gojo/
 | --- | --- |
 | Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), free demo tiles by default |
 | Background location | `expo-location` + `expo-task-manager` OS task, 60s / balanced accuracy, foreground-service banner, boot auto-resume |
-| Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts` — no polling |
+| Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts`, no polling |
 | Multi-tenant isolation | Every table family-scoped; Postgres RLS built on `current_family_id()`; `family_id` only mutable via audited `create_family` / `join_family` RPCs |
 | Mutual visibility (Layer 4) | Enforced in the `locations` SELECT policy, not the UI |
 | Awareness ping (Layer 2) | 6-hour repeating local notification, scheduled while sharing is on |
@@ -27,7 +27,7 @@ project_gojo/
 
 ## 1. Backend setup (Supabase)
 
-**Project `qevscpmifoqkkfiysynx` (eu-west-1) — all 7 migrations are already
+**Project `qevscpmifoqkkfiysynx` (eu-west-1), all 7 migrations are already
 applied** (schema, RLS, RPCs, realtime for `locations` / `messages` /
 `sos_alerts`, plus the optional pg_cron SOS auto-clear + pg_net chat trigger).
 `mobile/.env` holds the URL + anon key.
@@ -38,7 +38,7 @@ supabase link --project-ref qevscpmifoqkkfiysynx
 supabase db push
 ```
 
-### Edge Functions — deployed ✓
+### Edge Functions, deployed ✓
 `sos-alert` and `notify-message` are live on `qevscpmifoqkkfiysynx` (both
 `verify_jwt=false`; they check auth themselves). Redeploy after edits:
 ```bash
@@ -80,7 +80,7 @@ npm run ios          # expo run:ios      (macOS)
 
 Then `npm start` to iterate over the dev build.
 
-`npm run typecheck` — `tsc --noEmit`, currently clean.
+`npm run typecheck`, `tsc --noEmit`, currently clean.
 
 ## 3. Schema
 

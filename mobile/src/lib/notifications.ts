@@ -70,7 +70,7 @@ export async function registerPushToken(): Promise<void> {
   }
 }
 
-/** Spec §4 Layer 2 — a repeating local ping that cannot be silently suppressed. */
+/** Spec §4 Layer 2, a repeating local ping that cannot be silently suppressed. */
 export async function scheduleAwarenessPing(): Promise<void> {
   await cancelAwarenessPing();
   await Notifications.scheduleNotificationAsync({

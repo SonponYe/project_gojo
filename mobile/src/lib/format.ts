@@ -2,7 +2,7 @@ import { Tracking } from './config';
 
 export type Freshness = 'live' | 'recent' | 'offline';
 
-/** Spec §2.1 — green / amber / grey status dot from the last-fix age. */
+/** Spec §2.1, green / amber / grey status dot from the last-fix age. */
 export function freshnessOf(updatedAt: string | null | undefined): Freshness {
   if (!updatedAt) return 'offline';
   const age = Date.now() - new Date(updatedAt).getTime();
@@ -35,7 +35,7 @@ export function clockTime(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
 }
 
-/** Battery colour bands — spec §10.1. */
+/** Battery colour bands, spec §10.1. */
 export function batteryColor(level: number | null | undefined): string {
   if (level == null) return '#9CA3AF';
   if (level >= 0.3) return '#22C55E';
@@ -44,7 +44,7 @@ export function batteryColor(level: number | null | undefined): string {
 }
 
 export function batteryPercent(level: number | null | undefined): string {
-  if (level == null) return '—';
+  if (level == null) return 'N/A';
   return `${Math.round(level * 100)}%`;
 }
 

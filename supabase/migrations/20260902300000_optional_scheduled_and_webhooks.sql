@@ -1,15 +1,15 @@
--- Gojo · OPTIONAL — scheduled cleanup + chat push webhook.
+-- Gojo · OPTIONAL, scheduled cleanup + chat push webhook.
 --
 -- This migration is safe to run as-is: every block is guarded and will simply
 -- no-op if the required extension isn't available or the settings aren't set.
 -- It wires up two nice-to-haves:
 --
---   1. pg_cron  — hard-resolve SOS alerts older than 30 minutes.
---   2. pg_net   — POST to the `notify-message` Edge Function on every new chat
+--   1. pg_cron , hard-resolve SOS alerts older than 30 minutes.
+--   2. pg_net  , POST to the `notify-message` Edge Function on every new chat
 --                 message so members get a push when the app is closed.
 --
 -- To enable the chat webhook, set these once (Dashboard → Database → Settings,
--- or psql).  Use the *service role* key — it never reaches a client.
+-- or psql).  Use the *service role* key, it never reaches a client.
 --
 --   alter database postgres set app.settings.functions_base_url =
 --     'https://<PROJECT_REF>.supabase.co/functions/v1';

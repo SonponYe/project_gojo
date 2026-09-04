@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 
 const PAGE = 50;
 
-/** Family group chat (spec §2.2) over Supabase Realtime — no polling. */
+/** Family group chat (spec §2.2) over Supabase Realtime, no polling. */
 export function useMessages(familyId: string | null | undefined, myId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);

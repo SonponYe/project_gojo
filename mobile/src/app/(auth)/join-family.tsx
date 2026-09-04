@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import {
   KeyboardAvoidingView,
@@ -9,6 +10,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { useAuth } from '../../context/auth';
 import { t } from '../../i18n';
@@ -72,39 +74,49 @@ export default function JoinFamily() {
           />
         </View>
 
-        {mode === 'join' ? (
-          <Field
-            label={t('onboarding.inviteCode')}
-            value={code}
-            onChangeText={(v) => setCode(v.toUpperCase())}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            maxLength={6}
-            placeholder="ABC123"
-          />
-        ) : (
-          <Field
-            label={t('onboarding.familyName')}
-            value={familyName}
-            onChangeText={setFamilyName}
-            autoCapitalize="words"
-            placeholder="The Mensah family"
-          />
-        )}
+        <Animated.View layout={LinearTransition.duration(200)}>
+          {mode === 'join' ? (
+            <Animated.View key="join" entering={FadeIn.duration(180)} exiting={FadeOut.duration(120)}>
+              <Field
+                label={t('onboarding.inviteCode')}
+                value={code}
+                onChangeText={(v) => setCode(v.toUpperCase())}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                maxLength={6}
+                placeholder="ABC123"
+              />
+            </Animated.View>
+          ) : (
+            <Animated.View key="create" entering={FadeIn.duration(180)} exiting={FadeOut.duration(120)}>
+              <Field
+                label={t('onboarding.familyName')}
+                value={familyName}
+                onChangeText={setFamilyName}
+                autoCapitalize="words"
+                placeholder="The Mensah family"
+              />
+            </Animated.View>
+          )}
+        </Animated.View>
 
-        {/* Safety Layer 1 — explicit, logged consent. */}
+        {/* Safety Layer 1, explicit, logged consent. */}
         <Card style={styles.consentCard}>
           <Text style={styles.consentTitle}>{t('onboarding.consentTitle')}</Text>
           <Text style={styles.consentBody}>{t('onboarding.consentBody')}</Text>
           <Pressable style={styles.checkRow} onPress={() => setConsented((v) => !v)}>
             <View style={[styles.checkbox, consented && styles.checkboxOn]}>
-              {consented ? <Text style={styles.checkmark}>✓</Text> : null}
+              {consented ? <Ionicons name="checkmark" size={18} color="#fff" /> : null}
             </View>
             <Text style={styles.checkLabel}>{t('onboarding.consentAccept')}</Text>
           </Pressable>
         </Card>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? (
+          <Animated.Text entering={FadeIn.duration(150)} style={styles.error}>
+            {error}
+          </Animated.Text>
+        ) : null}
 
         <Button
           title={mode === 'join' ? t('onboarding.join') : t('onboarding.create')}
@@ -157,7 +169,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxOn: { backgroundColor: Palette.brand },
-  checkmark: { color: '#fff', fontWeight: '900' },
   checkLabel: { fontWeight: '700', color: Palette.text, flex: 1 },
   error: { color: Palette.danger, fontWeight: '600', textAlign: 'center' },
   signout: { textAlign: 'center', color: Palette.textDim, fontWeight: '600', paddingVertical: 10 },

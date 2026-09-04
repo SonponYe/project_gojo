@@ -3,7 +3,7 @@
 -- the sos_alerts table, and the saved_places table.
 
 -- ---------------------------------------------------------------------------
--- locations — new columns (★ in the v2 schema figure)
+-- locations, new columns (★ in the v2 schema figure)
 -- ---------------------------------------------------------------------------
 alter table public.locations
   add column if not exists battery_level real
@@ -14,12 +14,12 @@ alter table public.locations
   add column if not exists place_name text
     check (place_name is null or char_length(place_name) <= 40);
 
-comment on column public.locations.battery_level is 'v2 — phone battery, 0.0-1.0, sent on every update.';
-comment on column public.locations.signal_type  is 'v2 — connectivity type at time of update.';
-comment on column public.locations.place_name   is 'v2 — matched saved-place name for this position, if any.';
+comment on column public.locations.battery_level is 'v2, phone battery, 0.0-1.0, sent on every update.';
+comment on column public.locations.signal_type  is 'v2, connectivity type at time of update.';
+comment on column public.locations.place_name   is 'v2, matched saved-place name for this position, if any.';
 
 -- ---------------------------------------------------------------------------
--- sos_alerts — one row per SOS event (v2.3)
+-- sos_alerts, one row per SOS event (v2.3)
 -- ---------------------------------------------------------------------------
 create table if not exists public.sos_alerts (
   id          uuid primary key default gen_random_uuid(),
@@ -36,7 +36,7 @@ create index if not exists sos_alerts_family_active_idx
   on public.sos_alerts (family_id, created_at desc)
   where resolved_at is null;
 
-comment on table public.sos_alerts is 'v2 — an "I need help" alert fanned out to the whole family via push.';
+comment on table public.sos_alerts is 'v2, an "I need help" alert fanned out to the whole family via push.';
 
 -- Active alerts = unresolved and less than 30 minutes old. The app reads this
 -- view; a scheduled job (optional, see 20260902300000) hard-clears the rest.
@@ -47,10 +47,10 @@ with (security_invoker = true) as
    where resolved_at is null
      and created_at > now() - interval '30 minutes';
 
-comment on view public.active_sos_alerts is 'v2 — unresolved SOS alerts under 30 minutes old.';
+comment on view public.active_sos_alerts is 'v2, unresolved SOS alerts under 30 minutes old.';
 
 -- ---------------------------------------------------------------------------
--- saved_places — personal named locations (v2.4)
+-- saved_places, personal named locations (v2.4)
 -- ---------------------------------------------------------------------------
 create table if not exists public.saved_places (
   id         uuid primary key default gen_random_uuid(),
@@ -64,7 +64,7 @@ create table if not exists public.saved_places (
 
 create index if not exists saved_places_user_idx on public.saved_places (user_id);
 
-comment on table public.saved_places is 'v2 — up to 10 personal named places per user. Names are private to their owner.';
+comment on table public.saved_places is 'v2, up to 10 personal named places per user. Names are private to their owner.';
 
 -- Enforce the "max 10 per user" cap from the spec.
 create or replace function public.saved_places_enforce_limit()

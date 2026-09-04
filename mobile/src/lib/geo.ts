@@ -20,7 +20,7 @@ export function haversineMeters(
 }
 
 /**
- * Spec §10.4 — if the position falls inside a saved place's radius, return that
+ * Spec §10.4, if the position falls inside a saved place's radius, return that
  * place's name (nearest wins). Otherwise null and the caller reverse-geocodes.
  */
 export function matchSavedPlace(

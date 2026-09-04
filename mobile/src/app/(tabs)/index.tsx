@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '../../context/auth';
@@ -45,23 +47,32 @@ export default function MapScreen() {
       />
 
       {sosBanner ? (
-        <Pressable
-          style={[styles.sosBanner, { top: insets.top + 8 }]}
-          onPress={() => setSelectedId(alerts[0].sender_id)}>
-          <Text style={styles.sosBannerText}>🚨 {sosBanner}</Text>
-        </Pressable>
+        <Animated.View
+          entering={FadeInDown.duration(220)}
+          exiting={FadeOutUp.duration(160)}
+          style={[styles.sosBanner, { top: insets.top + 8 }]}>
+          <Pressable
+            style={styles.sosBannerPress}
+            onPress={() => setSelectedId(alerts[0].sender_id)}>
+            <Ionicons name="warning" size={18} color="#fff" />
+            <Text style={styles.sosBannerText}>{sosBanner}</Text>
+          </Pressable>
+        </Animated.View>
       ) : null}
 
       {sharingCount === 0 ? (
-        <View style={[styles.empty, { top: insets.top + 60 }]}>
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          style={[styles.empty, { top: insets.top + 60 }]}>
           <Text style={styles.emptyText}>{t('map.empty')}</Text>
-        </View>
+        </Animated.View>
       ) : null}
 
       <Pressable
         style={[styles.recenter, { bottom: (selected ? 260 : 24) + insets.bottom }]}
         onPress={() => setFitToken((n) => n + 1)}>
-        <Text style={styles.recenterText}>◎ {t('map.recenter')}</Text>
+        <Ionicons name="locate" size={16} color={Palette.brand} />
+        <Text style={styles.recenterText}>{t('map.recenter')}</Text>
       </Pressable>
 
       {selected ? (
@@ -86,10 +97,16 @@ const styles = StyleSheet.create({
     right: 12,
     backgroundColor: '#B91C1C',
     borderRadius: 14,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  sosBannerPress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    alignItems: 'center',
-    elevation: 6,
   },
   sosBannerText: { color: '#fff', fontWeight: '800', fontSize: 15 },
   empty: {
@@ -104,6 +121,9 @@ const styles = StyleSheet.create({
   recenter: {
     position: 'absolute',
     right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: '#fff',
     paddingVertical: 10,
     paddingHorizontal: 14,

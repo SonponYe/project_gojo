@@ -75,7 +75,7 @@ export function useSos(familyId: string | null | undefined, myId: string | undef
         body: { lat: coords.latitude, lng: coords.longitude },
       });
       // Fallback (function not deployed / offline): insert directly. RLS allows
-      // it, realtime still alerts anyone with the app open — only closed-app
+      // it, realtime still alerts anyone with the app open, only closed-app
       // push is lost.
       if (error && familyId && myId) {
         await supabase.from('sos_alerts').insert({

@@ -3,7 +3,7 @@
 -- that every RLS policy is built on.
 
 -- ---------------------------------------------------------------------------
--- current_family_id() — the family the caller belongs to.
+-- current_family_id(), the family the caller belongs to.
 -- SECURITY DEFINER so it can read public.users without tripping that table's
 -- own RLS (which would recurse). Used by every family-scoped policy.
 -- ---------------------------------------------------------------------------
@@ -20,7 +20,7 @@ $$;
 comment on function public.current_family_id() is 'The caller''s family_id. Building block for all RLS policies.';
 
 -- ---------------------------------------------------------------------------
--- generate_invite_code() — 6 chars, unambiguous alphabet, guaranteed unique.
+-- generate_invite_code(), 6 chars, unambiguous alphabet, guaranteed unique.
 -- ---------------------------------------------------------------------------
 create or replace function public.generate_invite_code()
 returns text
@@ -45,7 +45,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- handle_new_user() — mirror every new auth user into public.users.
+-- handle_new_user(), mirror every new auth user into public.users.
 -- ---------------------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -71,7 +71,7 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ---------------------------------------------------------------------------
--- create_family(name) — start a new family, join it, log consent.
+-- create_family(name), start a new family, join it, log consent.
 -- ---------------------------------------------------------------------------
 create or replace function public.create_family(p_name text)
 returns public.families
@@ -104,7 +104,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- join_family(invite_code) — join an existing family, log consent.
+-- join_family(invite_code), join an existing family, log consent.
 -- ---------------------------------------------------------------------------
 create or replace function public.join_family(p_invite_code text)
 returns public.families
@@ -138,7 +138,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- regenerate_invite_code() — rotate the code for the caller's own family.
+-- regenerate_invite_code(), rotate the code for the caller's own family.
 -- ---------------------------------------------------------------------------
 create or replace function public.regenerate_invite_code()
 returns text
@@ -161,7 +161,7 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- leave_family() — drop out of the current family and stop sharing.
+-- leave_family(), drop out of the current family and stop sharing.
 -- ---------------------------------------------------------------------------
 create or replace function public.leave_family()
 returns void

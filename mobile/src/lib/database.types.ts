@@ -70,7 +70,7 @@ export interface SavedPlace {
   created_at: string;
 }
 
-/** A family member joined with their latest location — what the map renders. */
+/** A family member joined with their latest location, what the map renders. */
 export interface MemberWithLocation {
   user: AppUser;
   location: LocationRow | null;

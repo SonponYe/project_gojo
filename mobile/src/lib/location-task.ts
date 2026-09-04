@@ -1,9 +1,9 @@
-// Spec §3 — the always-on background location task.
+// Spec §3, the always-on background location task.
 //
 // IMPORTANT: TaskManager.defineTask MUST run in the global module scope so the
 // OS can spin up the JS runtime, run this, and tear it down with no React tree
 // mounted. This file is imported once from the root _layout, which the router
-// entry always loads — including on a headless background launch and after a
+// entry always loads, including on a headless background launch and after a
 // device reboot (the task auto-re-registers on boot).
 
 import * as Location from 'expo-location';
@@ -32,7 +32,7 @@ const handleLocationTask: TaskManager.TaskManagerTaskExecutor<LocationTaskData> 
   try {
     const { data: session } = await supabase.auth.getSession();
     const uid = session.session?.user.id;
-    if (!uid) return; // signed out — nothing to report
+    if (!uid) return; // signed out, nothing to report
 
     // Only write while the master toggle is on (spec §2.3).
     const { data: me } = await supabase
@@ -67,13 +67,13 @@ const handleLocationTask: TaskManager.TaskManagerTaskExecutor<LocationTaskData> 
       { onConflict: 'user_id' },
     );
   } catch (err) {
-    // Offline or transient — the OS keeps the last fix and we retry next tick
+    // Offline or transient, the OS keeps the last fix and we retry next tick
     // (spec §3 "No internet": pushed the moment connectivity returns).
     console.warn('[gojo] background upsert skipped', (err as Error)?.message);
   }
 };
 
-// No background task runtime on web — skip registration there.
+// No background task runtime on web, skip registration there.
 if (Platform.OS !== 'web') {
   TaskManager.defineTask(BACKGROUND_LOCATION_TASK, handleLocationTask);
 }

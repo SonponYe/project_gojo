@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { t } from '../i18n';
 import type { MemberWithLocation } from '../lib/database.types';
@@ -19,7 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-/** Spec §2.1 — the card that opens when you tap a pin. §10 adds battery/signal/SOS. */
+/** Spec §2.1, the card that opens when you tap a pin. §10 adds battery/signal/SOS. */
 export function PinCard({
   member,
   isMe,
@@ -67,7 +69,10 @@ export function PinCard({
   }
 
   return (
-    <View style={styles.card}>
+    <Animated.View
+      entering={SlideInDown.springify().damping(18)}
+      exiting={SlideOutDown.duration(180)}
+      style={styles.card}>
       <View style={styles.handle} />
       <View style={styles.row}>
         <Avatar name={user.name} url={user.avatar_url} color={pinColorFor(user.id)} size={44} />
@@ -81,7 +86,7 @@ export function PinCard({
           </View>
         </View>
         <Pressable onPress={onClose} hitSlop={12}>
-          <Text style={styles.close}>✕</Text>
+          <Ionicons name="close" size={20} color={Palette.textDim} />
         </Pressable>
       </View>
 
@@ -93,6 +98,7 @@ export function PinCard({
             <SignalBadge type={location.signal_type} />
           </View>
           <Pressable style={styles.mapsBtn} onPress={openInMaps}>
+            <Ionicons name="navigate-outline" size={16} color={Palette.brand} />
             <Text style={styles.mapsBtnText}>{t('map.openInMaps')}</Text>
           </Pressable>
         </>
@@ -107,7 +113,7 @@ export function PinCard({
           onResolve={onResolveSos}
         />
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -147,7 +153,10 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.brandSoft,
     paddingVertical: 12,
     borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   mapsBtnText: { color: Palette.brand, fontWeight: '800' },
 });

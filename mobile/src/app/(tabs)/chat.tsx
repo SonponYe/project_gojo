@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import {
   FlatList,
@@ -11,6 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '../../context/auth';
@@ -89,7 +91,7 @@ export default function ChatScreen() {
 
         <View style={[styles.inputBar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
           <Pressable onPress={onShareLocation} hitSlop={8} style={styles.pinBtn}>
-            <Text style={{ fontSize: 20 }}>📍</Text>
+            <Ionicons name="location" size={22} color={Palette.brand} />
           </Pressable>
           <TextInput
             style={styles.input}
@@ -132,7 +134,9 @@ function Bubble({
   };
 
   return (
-    <View style={[styles.bubbleRow, mine ? styles.rowMine : styles.rowTheirs]}>
+    <Animated.View
+      entering={FadeInUp.duration(220)}
+      style={[styles.bubbleRow, mine ? styles.rowMine : styles.rowTheirs]}>
       {!mine ? (
         <View style={[styles.avatar, { backgroundColor: pinColorFor(message.sender_id) }]}>
           <Text style={styles.avatarText}>{initialsOf(name)}</Text>
@@ -142,17 +146,29 @@ function Bubble({
         {!mine ? <Text style={styles.senderName}>{name}</Text> : null}
         {message.kind === 'location' ? (
           <Pressable onPress={openLocation} style={styles.locCard}>
-            <Text style={styles.locTitle}>{t('chat.locationCard')}</Text>
-            <Text style={[styles.locOpen, mine && { color: '#E9E7FB' }]}>
-              {t('chat.openLocation')} →
-            </Text>
+            <View style={styles.locCardHeader}>
+              <Ionicons name="location" size={16} color={mine ? '#fff' : Palette.brand} />
+              <Text style={[styles.locTitle, mine && { color: '#fff' }]}>
+                {t('chat.locationCard')}
+              </Text>
+            </View>
+            <View style={styles.locOpenRow}>
+              <Text style={[styles.locOpen, mine && { color: '#E9E7FB' }]}>
+                {t('chat.openLocation')}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={14}
+                color={mine ? '#E9E7FB' : Palette.brand}
+              />
+            </View>
           </Pressable>
         ) : (
           <Text style={[styles.bubbleText, mine && { color: '#fff' }]}>{message.body}</Text>
         )}
         <Text style={[styles.time, mine && { color: '#D9D6F7' }]}>{clockTime(message.sent_at)}</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -179,7 +195,9 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 15, color: Palette.text, lineHeight: 20 },
   time: { fontSize: 10, color: Palette.textDim, marginTop: 4, alignSelf: 'flex-end' },
   locCard: { gap: 4, paddingVertical: 2 },
+  locCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   locTitle: { fontSize: 15, fontWeight: '700', color: Palette.text },
+  locOpenRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   locOpen: { fontSize: 13, fontWeight: '700', color: Palette.brand },
   inputBar: {
     flexDirection: 'row',

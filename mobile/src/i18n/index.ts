@@ -1,6 +1,6 @@
-// Spec §10.5 — English + Twi. Device language picks the default; a manual
+// Spec §10.5, English + Twi. Device language picks the default; a manual
 // override lives in the profile screen. Add a language by dropping in another
-// JSON file and registering it here — no code changes elsewhere.
+// JSON file and registering it here, no code changes elsewhere.
 
 import { I18n } from 'i18n-js';
 import { getLocales } from 'expo-localization';

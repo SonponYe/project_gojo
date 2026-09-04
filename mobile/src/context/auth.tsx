@@ -21,7 +21,7 @@ interface AuthState {
   /**
    * True once `profile`/`family` reflect the *current* `session` (false again
    * for the moment after sign-in/sign-out while the next profile is loading).
-   * Route gates should wait for this before deciding where to send the user —
+   * Route gates should wait for this before deciding where to send the user,
    * otherwise a fresh sign-in can strand you on the sign-in screen because
    * nothing re-evaluates "do I have a family yet?" once you're already on it.
    */
