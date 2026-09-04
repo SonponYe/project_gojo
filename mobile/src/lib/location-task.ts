@@ -8,6 +8,7 @@
 
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import { Platform } from 'react-native';
 
 import { BACKGROUND_LOCATION_TASK } from './config';
 import { matchSavedPlace } from './geo';
@@ -17,7 +18,10 @@ import type { SavedPlace } from './database.types';
 
 type LocationTaskData = { locations: Location.LocationObject[] };
 
-TaskManager.defineTask<LocationTaskData>(BACKGROUND_LOCATION_TASK, async ({ data, error }) => {
+const handleLocationTask: TaskManager.TaskManagerTaskExecutor<LocationTaskData> = async ({
+  data,
+  error,
+}) => {
   if (error) {
     console.warn('[gojo] background location error', error.message);
     return;
@@ -67,4 +71,9 @@ TaskManager.defineTask<LocationTaskData>(BACKGROUND_LOCATION_TASK, async ({ data
     // (spec §3 "No internet": pushed the moment connectivity returns).
     console.warn('[gojo] background upsert skipped', (err as Error)?.message);
   }
-});
+};
+
+// No background task runtime on web — skip registration there.
+if (Platform.OS !== 'web') {
+  TaskManager.defineTask(BACKGROUND_LOCATION_TASK, handleLocationTask);
+}
