@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 15, color: Palette.textDim, lineHeight: 21 },
   switcher: {
     flexDirection: 'row',
-    backgroundColor: '#ECECF3',
+    backgroundColor: '#EDEDEF',
     borderRadius: 12,
     padding: 4,
   },
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   tabActive: { backgroundColor: '#fff' },
   tabText: { fontWeight: '700', color: Palette.textDim },
   tabTextActive: { color: Palette.brand },
-  consentCard: { backgroundColor: Palette.brandSoft, borderColor: '#D9D6F7', gap: 10 },
+  consentCard: { backgroundColor: Palette.brandSoft, borderColor: '#E2E2E6', gap: 10 },
   consentTitle: { fontWeight: '800', color: Palette.brand, fontSize: 15 },
   consentBody: { color: Palette.text, lineHeight: 21 },
   checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 },

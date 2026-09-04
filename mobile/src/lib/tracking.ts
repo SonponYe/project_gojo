@@ -64,7 +64,7 @@ export async function startTracking(): Promise<PermissionResult> {
           // Spec §4 Layer 3 — the OS-enforced persistent banner.
           notificationTitle: t('notifications.foregroundServiceTitle'),
           notificationBody: t('notifications.foregroundServiceBody'),
-          notificationColor: '#534AB7',
+          notificationColor: '#0A0A0C',
         },
       });
     }

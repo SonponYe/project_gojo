@@ -11,15 +11,17 @@ import {
   type ViewProps,
 } from 'react-native';
 
+// Monochrome "black & white" theme. Danger (SOS) and ok (sharing-on) stay red/
+// green on purpose — those are safety-status colours, not branding.
 export const Palette = {
-  brand: '#534AB7',
-  brandSoft: '#EEEDFE',
+  brand: '#0A0A0C',
+  brandSoft: '#F0F0F2',
   danger: '#EF4444',
-  text: '#1A1A2E',
-  textDim: '#60646C',
-  border: '#E4E4EC',
+  text: '#0A0A0C',
+  textDim: '#68686E',
+  border: '#E2E2E6',
   card: '#FFFFFF',
-  bg: '#F6F6FB',
+  bg: '#F5F5F7',
   ok: '#22C55E',
 } as const;
 
