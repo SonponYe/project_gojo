@@ -27,34 +27,38 @@ project_gojo/
 
 ## 1. Backend setup (Supabase)
 
-You said you'd create the project and send its details. Once you have them:
+**Project `qevscpmifoqkkfiysynx` (eu-west-1) — all 7 migrations are already
+applied** (schema, RLS, RPCs, realtime for `locations` / `messages` /
+`sos_alerts`, plus the optional pg_cron SOS auto-clear + pg_net chat trigger).
+`mobile/.env` holds the URL + anon key.
 
-1. Put the API values in `mobile/.env` (see below).
-2. Apply the schema — either link the CLI and push:
-   ```bash
-   cd supabase
-   supabase link --project-ref <PROJECT_REF>
-   supabase db push
-   supabase functions deploy sos-alert
-   supabase functions deploy notify-message
-   ```
-   …or paste each file in `supabase/migrations/` (in filename order) into the
-   Dashboard SQL editor, then create the two functions from
-   `supabase/functions/`.
-3. Confirm **Realtime** is enabled for `locations`, `messages`, `sos_alerts`
-   (the `*_realtime.sql` migrations do this).
-4. *(Optional)* enable chat push + SOS auto-clear — run
-   `20260902300000_optional_scheduled_and_webhooks.sql` and set:
-   ```sql
-   alter database postgres set app.settings.functions_base_url =
-     'https://<PROJECT_REF>.supabase.co/functions/v1';
-   alter database postgres set app.settings.service_role_key = '<SERVICE_ROLE_KEY>';
-   ```
+Re-applying is idempotent:
+```bash
+supabase link --project-ref qevscpmifoqkkfiysynx
+supabase db push
+```
 
-### What I need from you
-- `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- (optional) a MapLibre style URL if you don't want the demo tiles
-- (optional) EAS project id for real push tokens
+### Still to do — deploy the two Edge Functions
+Needs a Supabase login (`supabase login`), which is interactive:
+```bash
+cd supabase
+supabase functions deploy sos-alert     --project-ref qevscpmifoqkkfiysynx
+supabase functions deploy notify-message --project-ref qevscpmifoqkkfiysynx
+```
+The app works without them: **SOS falls back to a direct insert** (family members
+with the app open still get the red alert via realtime; only push to a *closed*
+app is lost). `notify-message` is likewise only closed-app chat push.
+
+To turn the chat webhook on afterwards, set (Dashboard → Database → Settings):
+```sql
+alter database postgres set app.settings.functions_base_url =
+  'https://qevscpmifoqkkfiysynx.supabase.co/functions/v1';
+alter database postgres set app.settings.service_role_key = '<SERVICE_ROLE_KEY>';
+```
+
+### Optional
+- a MapLibre style URL (else free demo tiles) → `EXPO_PUBLIC_MAP_STYLE_URL`
+- an EAS project id for real push tokens → `EXPO_PUBLIC_EAS_PROJECT_ID`
 
 ## 2. Mobile setup
 

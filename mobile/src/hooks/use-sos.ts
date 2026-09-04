@@ -69,10 +69,22 @@ export function useSos(familyId: string | null | undefined, myId: string | undef
       } catch {
         coords = { latitude: 0, longitude: 0 };
       }
+      // Preferred path: the Edge Function records the row AND fans push out to
+      // family members whose app is closed.
       const { error } = await supabase.functions.invoke('sos-alert', {
         body: { lat: coords.latitude, lng: coords.longitude },
       });
-      if (error) throw error;
+      // Fallback (function not deployed / offline): insert directly. RLS allows
+      // it, realtime still alerts anyone with the app open — only closed-app
+      // push is lost.
+      if (error && familyId && myId) {
+        await supabase.from('sos_alerts').insert({
+          family_id: familyId,
+          sender_id: myId,
+          lat: coords.latitude,
+          lng: coords.longitude,
+        });
+      }
       await load();
     } finally {
       setSending(false);
