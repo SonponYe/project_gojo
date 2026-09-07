@@ -2,20 +2,28 @@
 // import, before any component code runs).
 import '../lib/location-task';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '../components/animated-splash';
 import { AuthProvider } from '../context/auth';
 import { setupNotificationChannels } from '../lib/notifications';
 
+// Hold the native splash until our animated overlay has taken over.
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
   const router = useRouter();
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
+    // Hand off from the native splash to the JS overlay on the same frame.
+    SplashScreen.hideAsync().catch(() => {});
     setupNotificationChannels();
 
     // Tapping a push: chat opens the chat tab; SOS opens the map focused on the
@@ -37,6 +45,8 @@ export default function RootLayout() {
     return () => sub.remove();
   }, [router]);
 
+  const onSplashFinish = useCallback(() => setSplashDone(true), []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
@@ -47,6 +57,7 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
           </Stack>
+          {!splashDone ? <AnimatedSplash onFinish={onSplashFinish} /> : null}
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
