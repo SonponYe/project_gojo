@@ -17,9 +17,13 @@ export const Config = {
     'EXPO_PUBLIC_SUPABASE_ANON_KEY',
     process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   ),
-  /** MapLibre style JSON. Defaults to the free MapLibre demo tiles. */
+  /**
+   * MapLibre style JSON. Defaults to OpenFreeMap's "liberty" street style —
+   * free, no API key, no rate limit. Override with a MapTiler/Protomaps/etc.
+   * style URL via EXPO_PUBLIC_MAP_STYLE_URL if you want a different look.
+   */
   mapStyleUrl:
-    process.env.EXPO_PUBLIC_MAP_STYLE_URL || 'https://demotiles.maplibre.org/style.json',
+    process.env.EXPO_PUBLIC_MAP_STYLE_URL || 'https://tiles.openfreemap.org/styles/liberty',
   /** EAS project id, needed for Expo push tokens on a device build. */
   easProjectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID || undefined,
 } as const;

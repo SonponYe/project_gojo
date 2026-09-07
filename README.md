@@ -16,7 +16,7 @@ project_gojo/
 
 | Concern | How |
 | --- | --- |
-| Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), free demo tiles by default |
+| Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), OpenFreeMap street tiles by default (free, no key) |
 | Background location | `expo-location` + `expo-task-manager` OS task, 60s / balanced accuracy, foreground-service banner, boot auto-resume |
 | Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts`, no polling |
 | Multi-tenant isolation | Every table family-scoped; Postgres RLS built on `current_family_id()`; `family_id` only mutable via audited `create_family` / `join_family` RPCs |
@@ -59,7 +59,7 @@ alter database postgres set app.settings.service_role_key = '<SERVICE_ROLE_KEY>'
 ```
 
 ### Optional
-- a MapLibre style URL (else free demo tiles) → `EXPO_PUBLIC_MAP_STYLE_URL`
+- a MapLibre style URL (else OpenFreeMap) → `EXPO_PUBLIC_MAP_STYLE_URL`
 - an EAS project id for real push tokens → `EXPO_PUBLIC_EAS_PROJECT_ID`
 
 ## 2. Mobile setup

@@ -58,12 +58,14 @@ export function PinCard({
     };
   }, [location]);
 
+  // Hand off to the phone's real maps app, straight into turn-by-turn directions
+  // to this person's last known position (Gojo itself isn't a nav app).
   function openInMaps() {
     if (!location) return;
     const { latitude, longitude } = location;
     const url = Platform.select({
-      ios: `http://maps.apple.com/?ll=${latitude},${longitude}&q=${encodeURIComponent(user.name)}`,
-      default: `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`,
+      ios: `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`,
+      default: `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`,
     });
     Linking.openURL(url!);
   }
