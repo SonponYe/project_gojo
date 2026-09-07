@@ -10,7 +10,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.koryis.gojo",
-      "icon": "./assets/expo.icon",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
@@ -25,9 +24,8 @@
       "package": "com.koryis.gojo",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0C",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/adaptive-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -54,7 +52,7 @@
         {
           "backgroundColor": "#0A0A0C",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 130
         }
       ],
       [
