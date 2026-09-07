@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { SIGNAL_LABEL } from '../lib/device-signals';
 import type { MemberWithLocation } from '../lib/database.types';
-import { freshnessOf, pinColorFor, timeAgo } from '../lib/format';
+import { batteryColor, batteryPercent, freshnessOf, pinColorFor, timeAgo } from '../lib/format';
 import { Avatar, StatusDot } from './badges';
 import { Palette } from './ui';
 
@@ -11,6 +12,7 @@ interface Props {
   myId: string | undefined;
   selectedId: string | null;
   onSelect: (userId: string) => void;
+  sosUserIds: Set<string>;
   fitToken: number;
 }
 
@@ -19,7 +21,7 @@ interface Props {
  * real map. Enough to exercise the data flow (realtime locations, pin cards,
  * SOS) in a browser; use a device build for the actual map.
  */
-export function FamilyMap({ roster, myId, selectedId, onSelect }: Props) {
+export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds }: Props) {
   const withLoc = roster.filter((m) => m.location);
   return (
     <View style={styles.wrap}>
@@ -30,10 +32,16 @@ export function FamilyMap({ roster, myId, selectedId, onSelect }: Props) {
       <ScrollView contentContainerStyle={styles.list}>
         {withLoc.map((m) => {
           const isMe = m.user.id === myId;
+          const loc = m.location!;
+          const hasSos = sosUserIds.has(m.user.id);
           return (
             <View
               key={m.user.id}
-              style={[styles.row, selectedId === m.user.id && styles.rowSelected]}
+              style={[
+                styles.row,
+                selectedId === m.user.id && styles.rowSelected,
+                hasSos && styles.rowSos,
+              ]}
               onTouchEnd={() => onSelect(m.user.id)}>
               <Avatar
                 name={m.user.name}
@@ -43,14 +51,20 @@ export function FamilyMap({ roster, myId, selectedId, onSelect }: Props) {
               />
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>
-                  {isMe ? `${m.user.name} (you)` : m.location?.place_name ?? m.user.name}
+                  {hasSos ? '🆘 ' : ''}
+                  {isMe ? `${m.user.name} (you)` : loc.place_name ?? m.user.name}
                 </Text>
                 <Text style={styles.meta}>
-                  {m.location?.latitude.toFixed(4)}, {m.location?.longitude.toFixed(4)} ·{' '}
-                  {timeAgo(m.location?.updated_at)}
+                  {timeAgo(loc.updated_at)} · {SIGNAL_LABEL[loc.signal_type ?? 'unknown']}
+                  {loc.battery_level != null ? ' · ' : ''}
+                  {loc.battery_level != null ? (
+                    <Text style={{ color: batteryColor(loc.battery_level), fontWeight: '700' }}>
+                      {batteryPercent(loc.battery_level)}
+                    </Text>
+                  ) : null}
                 </Text>
               </View>
-              <StatusDot freshness={freshnessOf(m.location?.updated_at)} />
+              <StatusDot freshness={freshnessOf(loc.updated_at)} />
             </View>
           );
         })}
@@ -80,6 +94,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   rowSelected: { borderWidth: 2, borderColor: Palette.brand },
+  rowSos: { borderWidth: 2, borderColor: Palette.danger },
   name: { fontWeight: '800', color: Palette.text },
   meta: { color: Palette.textDim, fontSize: 12, marginTop: 2 },
 });

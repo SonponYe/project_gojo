@@ -18,11 +18,20 @@ export default function RootLayout() {
   useEffect(() => {
     setupNotificationChannels();
 
-    // Tapping an SOS or chat push opens the map (spec §10.3).
+    // Tapping a push: chat opens the chat tab; SOS opens the map focused on the
+    // person who needs help (spec §10.3).
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const data = response.notification.request.content.data as { type?: string };
-      if (data?.type === 'sos' || data?.type === 'chat') {
-        router.navigate(data.type === 'chat' ? '/(tabs)/chat' : '/(tabs)');
+      const data = response.notification.request.content.data as {
+        type?: string;
+        sender_id?: string;
+      };
+      if (data?.type === 'chat') {
+        router.navigate('/(tabs)/chat');
+      } else if (data?.type === 'sos') {
+        router.navigate({
+          pathname: '/(tabs)',
+          params: data.sender_id ? { focus: data.sender_id } : {},
+        });
       }
     });
     return () => sub.remove();

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +21,14 @@ export default function MapScreen() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [fitToken, setFitToken] = useState(0);
+
+  // Deep link from an SOS push (spec §10.3) — open straight to that person's pin.
+  const { focus } = useLocalSearchParams<{ focus?: string }>();
+  useEffect(() => {
+    if (focus) setSelectedId(focus);
+  }, [focus]);
+
+  const sosUserIds = useMemo(() => new Set(alerts.map((a) => a.sender_id)), [alerts]);
 
   const selected = useMemo(
     () => roster.find((m) => m.user.id === selectedId) ?? null,
@@ -43,6 +52,7 @@ export default function MapScreen() {
         myId={profile?.id}
         selectedId={selectedId}
         onSelect={setSelectedId}
+        sosUserIds={sosUserIds}
         fitToken={fitToken}
       />
 
