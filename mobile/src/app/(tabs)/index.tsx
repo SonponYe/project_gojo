@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -9,6 +9,7 @@ import { useAuth } from '../../context/auth';
 import { useFamilyMap } from '../../hooks/use-family-map';
 import { useSos } from '../../hooks/use-sos';
 import { t } from '../../i18n';
+import { syncMyLocation } from '../../lib/location-sync';
 import { FamilyMap } from '../../components/family-map';
 import { PinCard } from '../../components/pin-card';
 import { Palette, Screen } from '../../components/ui';
@@ -16,11 +17,22 @@ import { Palette, Screen } from '../../components/ui';
 export default function MapScreen() {
   const { profile, family } = useAuth();
   const insets = useSafeAreaInsets();
-  const { roster, fromCache } = useFamilyMap(family?.id);
+  const { roster, fromCache, reload } = useFamilyMap(family?.id);
   const { alerts, myActiveAlert, sending, trigger, resolveMine } = useSos(family?.id, profile?.id);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [fitToken, setFitToken] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Push my own current position, then re-pull everyone's latest rows.
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([syncMyLocation(true), reload()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [reload]);
 
   // Deep link from an SOS push (spec §10.3) — open straight to that person's pin.
   const { focus } = useLocalSearchParams<{ focus?: string }>();
@@ -98,12 +110,23 @@ export default function MapScreen() {
         </Animated.View>
       ) : null}
 
-      <Pressable
-        style={[styles.recenter, { bottom: (selected ? 260 : 24) + insets.bottom }]}
-        onPress={() => setFitToken((n) => n + 1)}>
-        <Ionicons name="locate" size={16} color={Palette.brand} />
-        <Text style={styles.recenterText}>{t('map.recenter')}</Text>
-      </Pressable>
+      <View style={[styles.mapButtons, { bottom: (selected ? 260 : 24) + insets.bottom }]}>
+        <Pressable
+          style={styles.roundBtn}
+          onPress={onRefresh}
+          disabled={refreshing}
+          accessibilityLabel={t('map.refresh')}>
+          {refreshing ? (
+            <ActivityIndicator size="small" color={Palette.brand} />
+          ) : (
+            <Ionicons name="refresh" size={20} color={Palette.brand} />
+          )}
+        </Pressable>
+        <Pressable style={styles.recenter} onPress={() => setFitToken((n) => n + 1)}>
+          <Ionicons name="locate" size={16} color={Palette.brand} />
+          <Text style={styles.recenterText}>{t('map.recenter')}</Text>
+        </Pressable>
+      </View>
 
       {selected ? (
         <PinCard
@@ -158,9 +181,25 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   emptyText: { color: Palette.textDim, fontWeight: '600' },
-  recenter: {
+  mapButtons: {
     position: 'absolute',
     right: 16,
+    alignItems: 'flex-end',
+    gap: 10,
+  },
+  roundBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+  },
+  recenter: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,

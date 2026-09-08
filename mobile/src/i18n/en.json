@@ -50,6 +50,7 @@
     "cached": "Showing last known positions",
     "you": "You",
     "recenter": "Show everyone",
+    "refresh": "Refresh positions",
     "lastSeen": "Last seen",
     "updatedAgo": "Updated {{ago}}",
     "live": "Live now",
