@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { useFocusEffect } from 'expo-router';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -20,6 +21,7 @@ import { useMessages } from '../../hooks/use-messages';
 import { t } from '../../i18n';
 import type { AppUser, Message } from '../../lib/database.types';
 import { clockTime, initialsOf, pinColorFor } from '../../lib/format';
+import { setChatScreenFocused } from '../../lib/notifications';
 import { supabase } from '../../lib/supabase';
 import { Palette, Screen } from '../../components/ui';
 
@@ -30,6 +32,14 @@ export default function ChatScreen() {
   const [draft, setDraft] = useState('');
   const [members, setMembers] = useState<Record<string, AppUser>>({});
   const listRef = useRef<FlatList<Message>>(null);
+
+  // While this screen is up, suppress our own chat banners (WhatsApp-style).
+  useFocusEffect(
+    useCallback(() => {
+      setChatScreenFocused(true);
+      return () => setChatScreenFocused(false);
+    }, []),
+  );
 
   useEffect(() => {
     if (!family?.id) return;

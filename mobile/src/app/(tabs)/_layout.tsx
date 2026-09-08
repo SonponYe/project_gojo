@@ -3,6 +3,7 @@ import { Redirect, Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
 import { useAuth } from '../../context/auth';
+import { useLiveTracking } from '../../hooks/use-live-tracking';
 import { t } from '../../i18n';
 import { Palette } from '../../components/ui';
 
@@ -24,6 +25,7 @@ function TabIcon({
 
 export default function TabsLayout() {
   const { initializing, ready, session, profile } = useAuth();
+  useLiveTracking(!!profile?.is_sharing);
 
   if (initializing || !ready) return null;
   if (!session) return <Redirect href="/(auth)/sign-in" />;

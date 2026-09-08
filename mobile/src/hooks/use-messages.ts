@@ -5,6 +5,15 @@ import { supabase } from '../lib/supabase';
 
 const PAGE = 50;
 
+/** Fire a WhatsApp-style push to the rest of the family for a just-sent message. */
+async function notifyFamily(messageId: string) {
+  try {
+    await supabase.functions.invoke('notify-message', { body: { message_id: messageId } });
+  } catch {
+    // realtime still delivers it live; a closed app just misses this one buzz
+  }
+}
+
 /** Family group chat (spec §2.2) over Supabase Realtime, no polling. */
 export function useMessages(familyId: string | null | undefined, myId: string | undefined) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -58,9 +67,12 @@ export function useMessages(familyId: string | null | undefined, myId: string | 
       if (!body || !familyId || !myId) return;
       setSending(true);
       try {
-        await supabase
+        const { data } = await supabase
           .from('messages')
-          .insert({ family_id: familyId, sender_id: myId, kind: 'text', body });
+          .insert({ family_id: familyId, sender_id: myId, kind: 'text', body })
+          .select('id')
+          .single<{ id: string }>();
+        if (data?.id) notifyFamily(data.id);
       } finally {
         setSending(false);
       }
@@ -73,13 +85,18 @@ export function useMessages(familyId: string | null | undefined, myId: string | 
       if (!familyId || !myId) return;
       setSending(true);
       try {
-        await supabase.from('messages').insert({
-          family_id: familyId,
-          sender_id: myId,
-          kind: 'location',
-          latitude,
-          longitude,
-        });
+        const { data } = await supabase
+          .from('messages')
+          .insert({
+            family_id: familyId,
+            sender_id: myId,
+            kind: 'location',
+            latitude,
+            longitude,
+          })
+          .select('id')
+          .single<{ id: string }>();
+        if (data?.id) notifyFamily(data.id);
       } finally {
         setSending(false);
       }

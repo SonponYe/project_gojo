@@ -11,16 +11,38 @@ import { supabase } from './supabase';
 
 const AWARENESS_ID_KEY = 'gojo-awareness-ping';
 
+export const SOS_CATEGORY = 'sos';
+export const SOS_ACTION_DIRECTIONS = 'directions';
+
+// The chat screen sets this so we don't buzz someone who's already reading it.
+let chatScreenFocused = false;
+export function setChatScreenFocused(v: boolean) {
+  chatScreenFocused = v;
+}
+
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const data = notification.request.content.data as { type?: string };
+    const muteChat = data?.type === 'chat' && chatScreenFocused;
+    return {
+      shouldShowBanner: !muteChat,
+      shouldShowList: true,
+      shouldPlaySound: !muteChat,
+      shouldSetBadge: false,
+    };
+  },
 });
 
-export async function setupNotificationChannels(): Promise<void> {
+export async function setupNotifications(): Promise<void> {
+  // "Directions" quick action on SOS notifications (spec §10.3).
+  await Notifications.setNotificationCategoryAsync(SOS_CATEGORY, [
+    {
+      identifier: SOS_ACTION_DIRECTIONS,
+      buttonTitle: t('notifications.sosActionDirections'),
+      options: { opensAppToForeground: true },
+    },
+  ]);
+
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync('default', {
     name: t('notifications.channelDefault'),

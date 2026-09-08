@@ -84,16 +84,17 @@ Deno.serve(async (req) => {
     .neq("id", senderId)
     .not("push_token", "is", null);
 
-  const name = sender.name || "A family member";
+  const name = (sender.name ?? "").trim() || "A family member";
   const messages: ExpoPushMessage[] = (recipients ?? [])
     .filter((r) => !!r.push_token)
     .map((r) => ({
       to: r.push_token as string,
       title: "Gojo: SOS alert",
-      body: `${name} needs help! Tap to open their location.`,
+      body: `${name} needs help! Tap for their location, or use Directions.`,
       sound: "default",
       priority: "high",
       channelId: "sos",
+      categoryId: "sos", // enables the "Directions" quick action on the phone
       data: {
         type: "sos",
         alert_id: alert.id,

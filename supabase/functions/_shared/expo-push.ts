@@ -11,6 +11,7 @@ export interface ExpoPushMessage {
   sound?: "default" | null;
   priority?: "default" | "normal" | "high";
   channelId?: string;
+  categoryId?: string;
   ttl?: number;
 }
 

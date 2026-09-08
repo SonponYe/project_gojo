@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -36,6 +36,7 @@ export default function MapScreen() {
   );
   const sharingCount = roster.filter((m) => m.location).length;
 
+  const firstAlert = alerts[0] ?? null;
   const sosBanner = useMemo(() => {
     if (alerts.length === 0) return null;
     if (alerts.length === 1) {
@@ -44,6 +45,14 @@ export default function MapScreen() {
     }
     return t('map.sosBannerMany', { count: alerts.length });
   }, [alerts, roster]);
+
+  function directionsTo(lat: number, lng: number) {
+    const url = Platform.select({
+      ios: `http://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`,
+      default: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+    });
+    Linking.openURL(url!);
+  }
 
   return (
     <Screen>
@@ -56,16 +65,21 @@ export default function MapScreen() {
         fitToken={fitToken}
       />
 
-      {sosBanner ? (
+      {sosBanner && firstAlert ? (
         <Animated.View
           entering={FadeInDown.duration(220)}
           exiting={FadeOutUp.duration(160)}
           style={[styles.sosBanner, { top: insets.top + 8 }]}>
           <Pressable
             style={styles.sosBannerPress}
-            onPress={() => setSelectedId(alerts[0].sender_id)}>
+            onPress={() => setSelectedId(firstAlert.sender_id)}>
             <Ionicons name="warning" size={18} color="#fff" />
             <Text style={styles.sosBannerText}>{sosBanner}</Text>
+          </Pressable>
+          <Pressable
+            style={styles.sosBannerDir}
+            onPress={() => directionsTo(firstAlert.lat, firstAlert.lng)}>
+            <Ionicons name="navigate" size={16} color="#B91C1C" />
           </Pressable>
         </Animated.View>
       ) : null}
@@ -89,7 +103,8 @@ export default function MapScreen() {
         <PinCard
           member={selected}
           isMe={selected.user.id === profile?.id}
-          sosActive={!!myActiveAlert && selected.user.id === profile?.id}
+          myAlertActive={!!myActiveAlert}
+          theirSosActive={sosUserIds.has(selected.user.id)}
           sosSending={sending}
           onSos={trigger}
           onResolveSos={resolveMine}
@@ -105,12 +120,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 12,
     right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#B91C1C',
     borderRadius: 14,
     elevation: 6,
     overflow: 'hidden',
   },
   sosBannerPress: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -119,6 +137,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   sosBannerText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+  sosBannerDir: {
+    backgroundColor: '#fff',
+    alignSelf: 'stretch',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
   empty: {
     position: 'absolute',
     alignSelf: 'center',

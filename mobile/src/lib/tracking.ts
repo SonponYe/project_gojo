@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 
 import { BACKGROUND_LOCATION_TASK, Tracking } from './config';
 import { t } from '../i18n';
+import { syncMyLocation } from './location-sync';
 import { scheduleAwarenessPing, cancelAwarenessPing } from './notifications';
 import { supabase } from './supabase';
 
@@ -71,7 +72,7 @@ export async function startTracking(): Promise<PermissionResult> {
     await scheduleAwarenessPing();
   }
 
-  await writeImmediateFix(uid);
+  await syncMyLocation(true); // seed a position now, don't wait for the first tick
   return { ok: true };
 }
 
@@ -112,38 +113,3 @@ export async function resumeTrackingIfEnabled(): Promise<void> {
   }
 }
 
-async function writeImmediateFix(uid: string): Promise<void> {
-  try {
-    const fix = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-    const { matchSavedPlace } = await import('./geo');
-    const { readBatteryLevel, readSignalType } = await import('./device-signals');
-    const { data: places } = await supabase
-      .from('saved_places')
-      .select('*')
-      .eq('user_id', uid);
-    const [battery, signal] = await Promise.all([readBatteryLevel(), readSignalType()]);
-
-    await supabase.from('locations').upsert(
-      {
-        user_id: uid,
-        latitude: fix.coords.latitude,
-        longitude: fix.coords.longitude,
-        accuracy: fix.coords.accuracy ?? null,
-        speed: fix.coords.speed ?? null,
-        battery_level: battery,
-        signal_type: signal,
-        place_name: matchSavedPlace(
-          fix.coords.latitude,
-          fix.coords.longitude,
-          (places ?? []) as any,
-        ),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' },
-    );
-  } catch {
-    // no fix yet, the background task will deliver one shortly
-  }
-}

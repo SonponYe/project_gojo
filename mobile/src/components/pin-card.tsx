@@ -6,7 +6,7 @@ import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { t } from '../i18n';
 import type { MemberWithLocation } from '../lib/database.types';
-import { freshnessOf, pinColorFor, timeAgo } from '../lib/format';
+import { FRESHNESS_COLOR, freshnessOf, pinColorFor, timeAgo } from '../lib/format';
 import { Avatar, BatteryBadge, SignalBadge, StatusDot } from './badges';
 import { SosButton } from './sos-button';
 import { Palette } from './ui';
@@ -14,18 +14,21 @@ import { Palette } from './ui';
 interface Props {
   member: MemberWithLocation;
   isMe: boolean;
-  sosActive: boolean;
+  /** my own SOS alert is currently active (only relevant when isMe) */
+  myAlertActive: boolean;
+  /** the person shown here has an active SOS (only relevant when !isMe) */
+  theirSosActive: boolean;
   sosSending: boolean;
   onSos: () => void;
   onResolveSos: () => void;
   onClose: () => void;
 }
 
-/** Spec §2.1, the card that opens when you tap a pin. §10 adds battery/signal/SOS. */
 export function PinCard({
   member,
   isMe,
-  sosActive,
+  myAlertActive,
+  theirSosActive,
   sosSending,
   onSos,
   onResolveSos,
@@ -34,6 +37,8 @@ export function PinCard({
   const { user, location } = member;
   const [address, setAddress] = useState<string | null>(null);
   const label = location?.place_name ?? address;
+  const firstName = user.name.trim().split(/\s+/)[0] || user.name;
+  const fresh = freshnessOf(location?.updated_at);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +65,7 @@ export function PinCard({
 
   // Hand off to the phone's real maps app, straight into turn-by-turn directions
   // to this person's last known position (Gojo itself isn't a nav app).
-  function openInMaps() {
+  function openDirections() {
     if (!location) return;
     const { latitude, longitude } = location;
     const url = Platform.select({
@@ -76,14 +81,26 @@ export function PinCard({
       exiting={SlideOutDown.duration(180)}
       style={styles.card}>
       <View style={styles.handle} />
+
+      {!isMe && theirSosActive ? (
+        <View style={styles.sosStrip}>
+          <Ionicons name="warning" size={16} color="#fff" />
+          <Text style={styles.sosStripText}>{t('map.needsHelp', { name: firstName })}</Text>
+        </View>
+      ) : null}
+
       <View style={styles.row}>
         <Avatar name={user.name} url={user.avatar_url} color={pinColorFor(user.id)} size={44} />
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{isMe ? `${user.name} (${t('map.you')})` : user.name}</Text>
           <View style={styles.metaRow}>
-            <StatusDot freshness={freshnessOf(location?.updated_at)} />
-            <Text style={styles.meta}>
-              {location ? `${t('map.lastSeen')} ${timeAgo(location.updated_at)}` : t('map.offline')}
+            <StatusDot freshness={fresh} />
+            <Text style={[styles.meta, { color: FRESHNESS_COLOR[fresh] }]}>
+              {!location
+                ? t('map.offline')
+                : fresh === 'live'
+                  ? t('map.live')
+                  : t('map.updatedAgo', { ago: timeAgo(location.updated_at) })}
             </Text>
           </View>
         </View>
@@ -99,22 +116,35 @@ export function PinCard({
             <BatteryBadge level={location.battery_level} />
             <SignalBadge type={location.signal_type} />
           </View>
-          <Pressable style={styles.mapsBtn} onPress={openInMaps}>
-            <Ionicons name="navigate-outline" size={16} color={Palette.brand} />
-            <Text style={styles.mapsBtnText}>{t('map.openInMaps')}</Text>
-          </Pressable>
+
+          {!isMe ? (
+            <Pressable
+              style={[styles.dirBtn, theirSosActive && styles.dirBtnUrgent]}
+              onPress={openDirections}>
+              <Ionicons
+                name="navigate"
+                size={16}
+                color={theirSosActive ? '#fff' : Palette.brand}
+              />
+              <Text style={[styles.dirBtnText, theirSosActive && { color: '#fff' }]}>
+                {t('map.directionsTo', { name: firstName })}
+              </Text>
+            </Pressable>
+          ) : null}
         </>
       ) : null}
 
-      {/* SOS can be fired for anyone, including yourself (spec §10.3). */}
-      <View style={{ marginTop: 12 }}>
-        <SosButton
-          onTrigger={onSos}
-          sending={sosSending}
-          active={sosActive}
-          onResolve={onResolveSos}
-        />
-      </View>
+      {/* Spec (per product decision): you can only raise an SOS as yourself. */}
+      {isMe ? (
+        <View style={{ marginTop: 12 }}>
+          <SosButton
+            onTrigger={onSos}
+            sending={sosSending}
+            active={myAlertActive}
+            onResolve={onResolveSos}
+          />
+        </View>
+      ) : null}
     </Animated.View>
   );
 }
@@ -143,14 +173,23 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.border,
     marginBottom: 2,
   },
+  sosStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Palette.danger,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  sosStripText: { color: '#fff', fontWeight: '800', fontSize: 14 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   name: { fontSize: 17, fontWeight: '800', color: Palette.text },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
-  meta: { color: Palette.textDim, fontWeight: '600', fontSize: 13 },
-  close: { fontSize: 16, color: Palette.textDim, padding: 4 },
+  meta: { fontWeight: '700', fontSize: 13 },
   address: { color: Palette.text, fontSize: 15, fontWeight: '600' },
   badges: { flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 2 },
-  mapsBtn: {
+  dirBtn: {
     marginTop: 6,
     backgroundColor: Palette.brandSoft,
     paddingVertical: 12,
@@ -160,5 +199,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
   },
-  mapsBtnText: { color: Palette.brand, fontWeight: '800' },
+  dirBtnUrgent: { backgroundColor: Palette.danger },
+  dirBtnText: { color: Palette.brand, fontWeight: '800' },
 });

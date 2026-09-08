@@ -11,10 +11,8 @@ import * as TaskManager from 'expo-task-manager';
 import { Platform } from 'react-native';
 
 import { BACKGROUND_LOCATION_TASK } from './config';
-import { matchSavedPlace } from './geo';
-import { readBatteryLevel, readSignalType } from './device-signals';
+import { upsertLocation } from './location-sync';
 import { supabase } from './supabase';
-import type { SavedPlace } from './database.types';
 
 type LocationTaskData = { locations: Location.LocationObject[] };
 
@@ -39,36 +37,13 @@ const handleLocationTask: TaskManager.TaskManagerTaskExecutor<LocationTaskData> 
       .from('users')
       .select('is_sharing')
       .eq('id', uid)
-      .single();
+      .single<{ is_sharing: boolean }>();
     if (!me?.is_sharing) return;
 
-    const { latitude, longitude, accuracy, speed } = fix.coords;
-
-    const { data: places } = await supabase
-      .from('saved_places')
-      .select('*')
-      .eq('user_id', uid);
-
-    const [battery, signal] = await Promise.all([readBatteryLevel(), readSignalType()]);
-    const placeName = matchSavedPlace(latitude, longitude, (places ?? []) as SavedPlace[]);
-
-    await supabase.from('locations').upsert(
-      {
-        user_id: uid,
-        latitude,
-        longitude,
-        accuracy: accuracy ?? null,
-        speed: speed ?? null,
-        battery_level: battery,
-        signal_type: signal,
-        place_name: placeName,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' },
-    );
+    await upsertLocation(uid, fix.coords);
   } catch (err) {
-    // Offline or transient, the OS keeps the last fix and we retry next tick
-    // (spec §3 "No internet": pushed the moment connectivity returns).
+    // Offline or transient — a later trigger (reconnect, heartbeat, next tick)
+    // pushes a fresh fix (spec §3 "No internet").
     console.warn('[gojo] background upsert skipped', (err as Error)?.message);
   }
 };
