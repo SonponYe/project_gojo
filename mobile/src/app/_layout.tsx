@@ -13,6 +13,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '../components/animated-splash';
 import { AuthProvider } from '../context/auth';
+import { codeFromUrl, setPendingInviteCode } from '../lib/invite-link';
 import { setupNotifications, SOS_ACTION_DIRECTIONS } from '../lib/notifications';
 
 // Hold the native splash until our animated overlay has taken over.
@@ -26,6 +27,20 @@ export default function RootLayout() {
     // Hand off from the native splash to the JS overlay on the same frame.
     SplashScreen.hideAsync().catch(() => {});
     setupNotifications();
+
+    // An invite link (gojo://join-family?code=…) — stash the code so onboarding
+    // can prefill it even if the user has to sign in / sign up first.
+    Linking.getInitialURL().then((url) => {
+      const code = codeFromUrl(url);
+      if (code) setPendingInviteCode(code);
+    });
+    const linkSub = Linking.addEventListener('url', ({ url }) => {
+      const code = codeFromUrl(url);
+      if (code) {
+        setPendingInviteCode(code);
+        router.navigate('/(auth)/join-family');
+      }
+    });
 
     // Tapping a push: chat opens the chat tab; SOS opens the map focused on the
     // person who needs help, and its "Directions" action opens maps (spec §10.3).
@@ -57,7 +72,10 @@ export default function RootLayout() {
         });
       }
     });
-    return () => sub.remove();
+    return () => {
+      sub.remove();
+      linkSub.remove();
+    };
   }, [router]);
 
   const onSplashFinish = useCallback(() => setSplashDone(true), []);

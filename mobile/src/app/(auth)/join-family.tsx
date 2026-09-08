@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +14,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 
 import { useAuth } from '../../context/auth';
 import { t } from '../../i18n';
+import { takePendingInviteCode } from '../../lib/invite-link';
 import { supabase } from '../../lib/supabase';
 import { Button, Card, Field, Palette } from '../../components/ui';
 
@@ -21,12 +22,30 @@ type Mode = 'join' | 'create';
 
 export default function JoinFamily() {
   const { signOut, refreshProfile } = useAuth();
+  const params = useLocalSearchParams<{ code?: string }>();
   const [mode, setMode] = useState<Mode>('join');
   const [code, setCode] = useState('');
   const [familyName, setFamilyName] = useState('');
   const [consented, setConsented] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Prefill from an invite link (either the current route param, or one stashed
+  // before the user had to sign in).
+  useEffect(() => {
+    const fromParam = params.code?.trim().toUpperCase();
+    if (fromParam) {
+      setCode(fromParam);
+      setMode('join');
+      return;
+    }
+    takePendingInviteCode().then((stashed) => {
+      if (stashed) {
+        setCode(stashed);
+        setMode('join');
+      }
+    });
+  }, [params.code]);
 
   const canSubmit =
     consented && (mode === 'join' ? code.trim().length >= 4 : familyName.trim().length >= 1);

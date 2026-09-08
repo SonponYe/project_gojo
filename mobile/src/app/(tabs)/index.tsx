@@ -16,7 +16,7 @@ import { Palette, Screen } from '../../components/ui';
 export default function MapScreen() {
   const { profile, family } = useAuth();
   const insets = useSafeAreaInsets();
-  const { roster } = useFamilyMap(family?.id);
+  const { roster, fromCache } = useFamilyMap(family?.id);
   const { alerts, myActiveAlert, sending, trigger, resolveMine } = useSos(family?.id, profile?.id);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -89,6 +89,12 @@ export default function MapScreen() {
           entering={FadeIn.duration(300)}
           style={[styles.empty, { top: insets.top + 60 }]}>
           <Text style={styles.emptyText}>{t('map.empty')}</Text>
+        </Animated.View>
+      ) : fromCache ? (
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          style={[styles.empty, { top: insets.top + 60 }]}>
+          <Text style={styles.emptyText}>{t('map.cached')}</Text>
         </Animated.View>
       ) : null}
 

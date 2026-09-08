@@ -7,17 +7,20 @@ import {
   Linking,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Switch,
   Text,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import QRCode from 'react-native-qrcode-svg';
 
 import { useAuth } from '../../context/auth';
 import { useSavedPlaces } from '../../hooks/use-saved-places';
 import { SUPPORTED_LANGUAGES, t } from '../../i18n';
 import type { LanguageCode } from '../../lib/database.types';
+import { buildInviteLink, inviteShareMessage } from '../../lib/invite-link';
 import { supabase } from '../../lib/supabase';
 import { startTracking, stopTracking } from '../../lib/tracking';
 import { AddPlaceModal } from '../../components/add-place-modal';
@@ -66,6 +69,17 @@ export default function ProfileScreen() {
   async function regenerate() {
     await supabase.rpc('regenerate_invite_code');
     await refreshProfile();
+  }
+
+  async function shareInvite() {
+    if (!family) return;
+    try {
+      await Share.share({
+        message: inviteShareMessage(family.invite_code, family.name),
+      });
+    } catch {
+      /* user dismissed */
+    }
   }
 
   function confirmLeave() {
@@ -131,14 +145,33 @@ export default function ProfileScreen() {
           ) : null}
         </Card>
 
-        {/* ---- Invite code ---- */}
+        {/* ---- Invite ---- */}
         <Label>{t('profile.inviteTitle')}</Label>
-        <Card>
-          <Text style={styles.help}>{t('profile.inviteHelp')}</Text>
+        <Card style={{ alignItems: 'center', gap: 12 }}>
+          <Text style={[styles.help, { alignSelf: 'stretch' }]}>{t('profile.inviteHelp')}</Text>
+
+          {family?.invite_code ? (
+            <View style={styles.qrWrap}>
+              <QRCode
+                value={buildInviteLink(family.invite_code)}
+                size={148}
+                color={Palette.text}
+                backgroundColor="#fff"
+              />
+            </View>
+          ) : null}
+
           <Pressable onPress={copyCode} style={styles.codeBox}>
             <Text style={styles.code}>{family?.invite_code ?? 'N/A'}</Text>
             <Text style={styles.codeHint}>{copied ? t('profile.copied') : 'Tap to copy'}</Text>
           </Pressable>
+
+          <Button
+            title={t('profile.shareInvite')}
+            variant="secondary"
+            onPress={shareInvite}
+            style={{ alignSelf: 'stretch' }}
+          />
           <Pressable onPress={regenerate}>
             <Text style={styles.linkBtn}>{t('profile.regenerate')}</Text>
           </Pressable>
@@ -234,12 +267,19 @@ const styles = StyleSheet.create({
   permTitle: { fontWeight: '800', color: Palette.danger },
   permBody: { color: Palette.text, fontSize: 13, lineHeight: 18 },
   permLink: { color: Palette.danger, fontWeight: '800', marginTop: 4 },
+  qrWrap: {
+    backgroundColor: '#fff',
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Palette.border,
+  },
   codeBox: {
+    alignSelf: 'stretch',
     backgroundColor: Palette.brandSoft,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
-    marginVertical: 10,
   },
   code: { fontSize: 30, fontWeight: '900', letterSpacing: 6, color: Palette.brand },
   codeHint: { color: Palette.brand, fontWeight: '600', fontSize: 12, marginTop: 4 },
