@@ -9,7 +9,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.koryis.gojo",
+      "bundleIdentifier": "com.gojo.app",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
@@ -21,7 +21,7 @@
       }
     },
     "android": {
-      "package": "com.koryis.gojo",
+      "package": "com.gojo.app",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0C",
