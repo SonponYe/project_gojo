@@ -139,12 +139,15 @@ configured, `users.push_token` stays null and those pushes silently no-op
 
 1. Firebase Console → new project → add an **Android app** with package
    `com.gojo.app` → download **`google-services.json`** to `mobile/`
-   (`android.googleServicesFile` already points at it; safe to commit).
-2. Firebase → Project settings → **Service accounts** → **Generate new private
+   (safe to commit).
+2. Add it to `mobile/app.json` under `android`:
+   `"googleServicesFile": "./google-services.json"` — and `git add` the file
+   (EAS Build only uploads git-tracked files).
+3. Firebase → Project settings → **Service accounts** → **Generate new private
    key** (this JSON *is* secret — do not commit).
-3. `cd mobile && npx eas-cli credentials` → Android → profile `preview` →
-   Google Service Account → upload the key from step 2.
-4. Rebuild. Sign in on each device; `users.push_token` should populate.
+4. `cd mobile && npx eas-cli credentials` → Android → profile `preview` →
+   Google Service Account → upload the key from step 3.
+5. Rebuild. Sign in on each device; `users.push_token` should populate.
 
 iOS push (APNs) is handled automatically by EAS once an Apple account exists.
 
