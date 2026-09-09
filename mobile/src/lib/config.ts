@@ -30,18 +30,21 @@ export const Config = {
 
 /** Tracking + freshness tuning. */
 export const Tracking = {
-  /** Background OS-task GPS cadence — a position at least every 5 minutes. */
-  intervalMs: 5 * 60_000,
+  /** Background OS-task GPS cadence — spec §3 "every 60 seconds". */
+  intervalMs: 60_000,
   /** Minimum metres moved before a background update is delivered. */
-  distanceIntervalM: 30,
-  /** While the app is open, push a position on this timer too (more frequent). */
-  foregroundSyncMs: 2 * 60_000,
+  distanceIntervalM: 15,
+  /** App open: live position stream (fires on movement) — near real-time. */
+  foregroundWatchMs: 8_000,
+  foregroundWatchM: 10,
+  /** App open: also push on this timer so a stationary pin still stays fresh. */
+  foregroundSyncMs: 60_000,
   /** Don't push again within this window of the last successful push (debounce). */
-  minSyncGapMs: 20_000,
-  /** Pin is "live" (green) if updated within this window (one bg cycle + slack). */
-  liveWindowMs: 7 * 60_000,
+  minSyncGapMs: 8_000,
+  /** Pin is "live" (green) if updated within this window. */
+  liveWindowMs: 3 * 60_000,
   /** Pin is "recent" (amber) up to this age; older is "offline" (grey). */
-  staleWindowMs: 60 * 60_000,
+  staleWindowMs: 30 * 60_000,
   /** Awareness ping cadence, spec §4 Layer 2 "every 6 hours". */
   awarenessIntervalSec: 6 * 60 * 60,
   /** An SOS auto-clears after this long, spec §10.3. */

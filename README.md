@@ -63,7 +63,7 @@ project_gojo/
 | Concern | How |
 | --- | --- |
 | Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), OpenFreeMap "liberty" street tiles by default (free, no key) |
-| Location freshness | `expo-location` + `expo-task-manager` OS task ≈ every 5 min, **plus** an in-app heartbeat (`useLiveTracking`) that pushes a fix on app open, on foreground, the instant connectivity returns, and every 2 min while open. Manual **Refresh** button on the map. Green pin ≤ 7 min old, amber ≤ 60 min, grey after. |
+| Location freshness | `expo-location` + `expo-task-manager` background OS task every ~60s, **plus** `useLiveTracking`: while the app is open it runs a live `watchPositionAsync` stream (near real-time), and it also pushes on app open, on foreground, the instant connectivity returns, and on a 60s stationary timer. Manual **Refresh** button on the map. Green pin ≤ 3 min old, amber ≤ 30 min, grey after. |
 | Offline viewer | `useFamilyMap` hydrates from an AsyncStorage snapshot first, then overlays the live fetch — the map is never blank; a "Showing last known positions" chip appears when serving cache. |
 | Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts` — no polling |
 | Multi-tenant isolation | Every table family-scoped; Postgres RLS built on `current_family_id()`; `family_id` only mutable via audited `create_family` / `join_family` RPCs |

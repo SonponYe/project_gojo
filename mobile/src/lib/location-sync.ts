@@ -49,11 +49,12 @@ export async function upsertLocation(uid: string, coords: Coords): Promise<boole
 }
 
 /**
- * Grab the current position and push it, if the signed-in user is sharing.
- * `force` bypasses the short debounce that stops rapid repeat calls (e.g. the
- * network listener firing several times as connectivity settles).
+ * Push a position, if the signed-in user is sharing. Pass `coords` when the
+ * caller already has a fix (the foreground watch) to skip a GPS read. `force`
+ * bypasses the short debounce that stops rapid repeat calls (e.g. the network
+ * listener firing several times as connectivity settles).
  */
-export async function syncMyLocation(force = false): Promise<boolean> {
+export async function syncMyLocation(force = false, coords?: Coords): Promise<boolean> {
   if (inFlight) return inFlight;
   if (!force && Date.now() - lastSyncAt < Tracking.minSyncGapMs) return false;
 
@@ -69,6 +70,8 @@ export async function syncMyLocation(force = false): Promise<boolean> {
         .eq('id', uid)
         .single<{ is_sharing: boolean }>();
       if (!me?.is_sharing) return false;
+
+      if (coords) return upsertLocation(uid, coords);
 
       let fix: Location.LocationObject | null = null;
       try {
