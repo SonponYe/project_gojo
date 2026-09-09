@@ -22,6 +22,7 @@
     },
     "android": {
       "package": "com.koryis.gojo",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0A0A0C",
         "foregroundImage": "./assets/images/adaptive-icon.png",
