@@ -1,9 +1,55 @@
-# Gojo — Family Location & Safety App
+# Gojo
 
-Always-on family location sharing, last-known location when offline, and a
-lightweight family group chat. Built from `Gojo_App_Description.docx` (v1) and
-`Gojo_App_Description_v2.docx` (v2 addendum: battery, signal, SOS, named places,
-Twi).
+## Overview
+A family-first, always-on location-sharing and quick-messaging app for real-life
+family safety: one shared live map, last-known location when someone is offline,
+a group chat, and an SOS button. Built for families — with Ghana in mind, where
+battery, signal and language are daily factors.
+
+## Problem It Solves
+Commercial family trackers are ad-heavy, complex, battery-hungry, and often feel
+like surveillance. Gojo does three things well — a live map, an offline-resilient
+last position, and lightweight chat — with anti-stalking safeguards baked in:
+explicit logged consent, mutual visibility enforced in the database (not the UI),
+a recurring "your location is being shared" reminder, and one-tap off with no
+confirmation. Plus an SOS that reaches the whole family in seconds.
+
+## Features
+- Live family map (MapLibre) with per-person freshness, battery %, and signal type
+- Always-on background location + in-app heartbeat + offline map cache (never blank)
+- Realtime family group chat with WhatsApp-style push and location-share cards
+- SOS: 2-second hold → urgent push to the family with a one-tap **Directions**
+  action, pulsing red pin, "I'm OK" / 30-min auto-clear
+- Named places ("Home", "School") that relabel your pin — private per user
+- Invite by QR code / shareable deep link
+- English + Twi, monochrome theme, deliberately generic app icon
+- Multi-tenant: every family fully isolated by Postgres Row Level Security
+
+## Tech Stack
+- **Frontend:** React Native (Expo SDK 57), expo-router, TypeScript, Reanimated, MapLibre GL
+- **Backend:** Supabase — PostgreSQL + Row Level Security, Realtime, Auth, Edge Functions (Deno)
+- **Push:** Expo Push → FCM / APNs
+- **Build / Deploy:** EAS Build
+- **Design:** in-app monochrome design system (no external tool)
+
+## My Role
+Solo project. Built end to end: the Supabase schema + RLS policies + onboarding
+RPCs + Edge Functions, and the whole Expo app — auth, map, chat, SOS, background
+tracking, i18n, theming, icon/splash — plus the EAS build pipeline. Product spec
+came from two written description documents (`*.docx` in this repo).
+
+## Status
+MVP — feature-complete against the v1 + v2 spec. Supabase backend deployed;
+Android build installable via EAS. Remaining: FCM for production push, profile
+photos, account management.
+
+## Live Link / Demo
+Private — Android build distributed via EAS to family testers. Not on any store.
+
+## Screenshots (optional)
+_TBD_
+
+---
 
 ```
 project_gojo/
