@@ -1,6 +1,6 @@
-# Gojo, Family Location & Safety App
+# Gojo — Family Location & Safety App
 
-Always-on family location sharing, last-known-location when offline, and a
+Always-on family location sharing, last-known location when offline, and a
 lightweight family group chat. Built from `Gojo_App_Description.docx` (v1) and
 `Gojo_App_Description_v2.docx` (v2 addendum: battery, signal, SOS, named places,
 Twi).
@@ -16,80 +16,108 @@ project_gojo/
 
 | Concern | How |
 | --- | --- |
-| Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), OpenFreeMap street tiles by default (free, no key) |
-| Background location | `expo-location` + `expo-task-manager` OS task, 60s / balanced accuracy, foreground-service banner, boot auto-resume |
-| Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts`, no polling |
+| Live map | MapLibre GL (`@maplibre/maplibre-react-native` v11), OpenFreeMap "liberty" street tiles by default (free, no key) |
+| Location freshness | `expo-location` + `expo-task-manager` OS task ≈ every 5 min, **plus** an in-app heartbeat (`useLiveTracking`) that pushes a fix on app open, on foreground, the instant connectivity returns, and every 2 min while open. Manual **Refresh** button on the map. Green pin ≤ 7 min old, amber ≤ 60 min, grey after. |
+| Offline viewer | `useFamilyMap` hydrates from an AsyncStorage snapshot first, then overlays the live fetch — the map is never blank; a "Showing last known positions" chip appears when serving cache. |
+| Realtime | Supabase Realtime channels for `locations`, `messages`, `sos_alerts` — no polling |
 | Multi-tenant isolation | Every table family-scoped; Postgres RLS built on `current_family_id()`; `family_id` only mutable via audited `create_family` / `join_family` RPCs |
 | Mutual visibility (Layer 4) | Enforced in the `locations` SELECT policy, not the UI |
-| Awareness ping (Layer 2) | 6-hour repeating local notification, scheduled while sharing is on |
-| SOS | `sos-alert` Edge Function records the row + fans Expo push to the family in one call (<2s); pin pulses red; auto-clears after 30 min |
+| Awareness ping (Layer 2) | 6-hour repeating **local** notification, scheduled while sharing is on (no FCM needed) |
+| SOS | Sendable **only as yourself** (own pin card). `sos-alert` Edge Function records the row + fans an Expo push to the family (<2s) with a **"Directions" quick action**; pin pulses red family-wide; auto-clears after 30 min. Falls back to a direct insert if the function/network is down. |
+| Chat notifications | On send, the app invokes `notify-message` → WhatsApp-style push to the rest of the family (title = sender, body = message). Muted for whoever is on the chat screen. |
+| Invite | Profile shows a **QR** + **Share invite link** (`gojo://join-family?code=…`); the code prefills onboarding even after a sign-in detour. |
 | i18n | `i18n-js` + `expo-localization`; `en` full, `tw` covers the six key phrases with fallback |
 
-## 1. Backend setup (Supabase)
+## 1. Backend (Supabase)
 
-**Project `qevscpmifoqkkfiysynx` (eu-west-1), all 7 migrations are already
-applied** (schema, RLS, RPCs, realtime for `locations` / `messages` /
-`sos_alerts`, plus the optional pg_cron SOS auto-clear + pg_net chat trigger).
-`mobile/.env` holds the URL + anon key.
+**Project `qevscpmifoqkkfiysynx` (eu-west-1)** — all migrations applied (schema,
+RLS, RPCs, realtime for `locations` / `messages` / `sos_alerts`, optional
+pg_cron SOS auto-clear + pg_net chat trigger). `mobile/.env` holds the URL +
+anon key; `supabase/.env` (gitignored) holds the CLI access token.
 
-Re-applying is idempotent:
+Re-applying migrations is idempotent:
 ```bash
-supabase link --project-ref qevscpmifoqkkfiysynx
-supabase db push
+npx supabase link --project-ref qevscpmifoqkkfiysynx
+npx supabase db push
 ```
 
-### Edge Functions, deployed ✓
-`sos-alert` and `notify-message` are live on `qevscpmifoqkkfiysynx` (both
-`verify_jwt=false`; they check auth themselves). Redeploy after edits:
+### Edge Functions — deployed ✓
+`sos-alert` and `notify-message` are live (`verify_jwt=false`; they authenticate
+the caller themselves). Redeploy after edits:
 ```bash
-export SUPABASE_ACCESS_TOKEN=...           # from supabase/.env (gitignored)
+export SUPABASE_ACCESS_TOKEN=...   # from supabase/.env
 npx supabase functions deploy sos-alert      --project-ref qevscpmifoqkkfiysynx --no-verify-jwt
 npx supabase functions deploy notify-message --project-ref qevscpmifoqkkfiysynx --no-verify-jwt
 ```
 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are auto-injected into the runtime.
-The app also degrades gracefully without them: **SOS falls back to a direct
-insert** (online family still get the realtime red alert; only closed-app push is
-lost), and `notify-message` is only closed-app chat push.
 
-To turn the chat webhook on, set (Dashboard → Database → Settings):
-```sql
-alter database postgres set app.settings.functions_base_url =
-  'https://qevscpmifoqkkfiysynx.supabase.co/functions/v1';
-alter database postgres set app.settings.service_role_key = '<SERVICE_ROLE_KEY>';
-```
-
-### Optional
-- a MapLibre style URL (else OpenFreeMap) → `EXPO_PUBLIC_MAP_STYLE_URL`
-- an EAS project id for real push tokens → `EXPO_PUBLIC_EAS_PROJECT_ID`
-
-## 2. Mobile setup
+## 2. Mobile — run in development
 
 ```bash
 cd mobile
-cp .env.example .env      # fill in the Supabase values
+cp .env.example .env      # Supabase URL + anon key
 npm install
+npm run typecheck         # tsc --noEmit, kept clean
 ```
 
-MapLibre + background location + notifications all need **native code**, so this
-does **not** run in Expo Go. Build a dev client:
+MapLibre, background location, notifications and QR all need **native code** —
+this does **not** run in Expo Go. Either a local dev client (`npm run android` /
+`npm run ios`, needs the platform SDK) or an EAS build (below).
+
+`npm run web` works as a limited preview: auth, onboarding, realtime chat,
+profile, saved places. The map falls back to a list (MapLibre is native-only).
+
+## 3. Build an installable app (EAS)
+
+App id **`com.gojo.app`** (Android + iOS). EAS project: `@sonpon_ye_shua/gojo`.
+Profiles in `mobile/eas.json` — `development` (dev client APK), `preview`
+(installable APK), `production` (AAB). Supabase public env is inlined there, so:
 
 ```bash
-npm run android      # expo run:android  (device or emulator)
-npm run ios          # expo run:ios      (macOS)
+npx eas-cli build -p android --profile preview
 ```
 
-Then `npm start` to iterate over the dev build.
+returns a downloadable **`.apk`**. Every family device needs this build. On many
+Android OEMs, also set **Settings → Apps → Gojo → Battery → Unrestricted** or the
+OS freezes the background task.
 
-`npm run typecheck`, `tsc --noEmit`, currently clean.
+**iOS** needs an Apple Developer account ($99/yr) → `--profile production` +
+`eas submit` → TestFlight.
 
-## 3. Schema
+### Push notifications need FCM (Android) — not yet set up
+
+SOS-to-a-closed-app and chat notifications ride Expo Push → **FCM**. Until it's
+configured, `users.push_token` stays null and those pushes silently no-op
+(realtime still delivers to any open app; the 6-hour ping and the
+"Location sharing active" banner are local and unaffected).
+
+1. Firebase Console → new project → add an **Android app** with package
+   `com.gojo.app` → download **`google-services.json`** to `mobile/`
+   (`android.googleServicesFile` already points at it; safe to commit).
+2. Firebase → Project settings → **Service accounts** → **Generate new private
+   key** (this JSON *is* secret — do not commit).
+3. `cd mobile && npx eas-cli credentials` → Android → profile `preview` →
+   Google Service Account → upload the key from step 2.
+4. Rebuild. Sign in on each device; `users.push_token` should populate.
+
+iOS push (APNs) is handled automatically by EAS once an Apple account exists.
+
+## 4. Schema
 
 `families` · `users` · `locations` · `messages` (v1) + `locations.battery_level`
-/ `signal_type` / `place_name`, `sos_alerts`, `saved_places` (v2). Full DDL and
-policies in `supabase/migrations/`. Regenerate `mobile/src/lib/database.types.ts`
-with `supabase gen types typescript` after linking.
+/ `signal_type` / `place_name`, `sos_alerts` (+ `active_sos_alerts` view),
+`saved_places`. Full DDL + policies in `supabase/migrations/`. Regenerate
+`mobile/src/lib/database.types.ts` with `supabase gen types typescript`.
 
 ## Deliberately out of scope
 
 Per the spec: no location history/playback, no arrival/departure alerts, no
 admin roles or one-way watching, no ads/analytics, no speed/route tracking.
+
+## Not done yet
+
+- FCM setup (above) — required for real push delivery on Android.
+- Profile photos (initials only today).
+- Account basics: forgot-password, edit name, delete account.
+- Named-place picker on a map (currently saves your *current* GPS position).
+- "Nudge" — a silent push that makes another phone report its position now.
