@@ -67,7 +67,20 @@
     "needsHelp": "{{name}} needs help",
     "imOk": "I'm OK",
     "sosBannerOne": "{{name}} needs help!",
-    "sosBannerMany": "{{count}} family members need help"
+    "sosBannerMany": "{{count}} family members need help",
+    "dropPin": "Drop a pin",
+    "dropPinHelp": "Marks this exact spot for the whole family to see — separate from anyone's live location. Good for \"meet here\" or remembering a place.",
+    "pinName": "What is this place?",
+    "dropPinSave": "Drop pin here",
+    "droppedBy": "Dropped by {{name}} · {{ago}}",
+    "directionsToPin": "Get directions",
+    "removePin": "Remove this pin",
+    "requestCheckin": "Ask them to check in",
+    "checkinSending": "Asking…",
+    "checkinSent": "Asked — waiting for them to open Gojo",
+    "peopleTitle": "Family",
+    "peopleSearch": "Search by name",
+    "peopleNone": "No one matches that search."
   },
   "chat": {
     "title": "Family group",
