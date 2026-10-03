@@ -22,6 +22,9 @@ interface Props {
   onSos: () => void;
   onResolveSos: () => void;
   onClose: () => void;
+  /** nudge them to open the app and report now — not available for yourself */
+  onRequestCheckin: () => void;
+  checkinState: 'idle' | 'sending' | 'sent';
 }
 
 export function PinCard({
@@ -33,6 +36,8 @@ export function PinCard({
   onSos,
   onResolveSos,
   onClose,
+  onRequestCheckin,
+  checkinState,
 }: Props) {
   const { user, location } = member;
   const [address, setAddress] = useState<string | null>(null);
@@ -134,6 +139,28 @@ export function PinCard({
         </>
       ) : null}
 
+      {/* No position bypasses anyone's phone — this just asks them to open the
+          app, which reports immediately once they do. */}
+      {!isMe ? (
+        <Pressable
+          style={styles.checkinBtn}
+          onPress={onRequestCheckin}
+          disabled={checkinState !== 'idle'}>
+          <Ionicons
+            name={checkinState === 'sent' ? 'checkmark' : 'paper-plane-outline'}
+            size={15}
+            color={Palette.textDim}
+          />
+          <Text style={styles.checkinBtnText}>
+            {checkinState === 'sent'
+              ? t('map.checkinSent')
+              : checkinState === 'sending'
+                ? t('map.checkinSending')
+                : t('map.requestCheckin')}
+          </Text>
+        </Pressable>
+      ) : null}
+
       {/* Spec (per product decision): you can only raise an SOS as yourself. */}
       {isMe ? (
         <View style={{ marginTop: 12 }}>
@@ -201,4 +228,12 @@ const styles = StyleSheet.create({
   },
   dirBtnUrgent: { backgroundColor: Palette.danger },
   dirBtnText: { color: Palette.brand, fontWeight: '800' },
+  checkinBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  checkinBtnText: { color: Palette.textDim, fontWeight: '700', fontSize: 13 },
 });
