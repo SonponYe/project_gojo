@@ -75,3 +75,14 @@ export interface MemberWithLocation {
   user: AppUser;
   location: LocationRow | null;
 }
+
+/** A shared waypoint dropped by a family member — visible to the whole family. */
+export interface MapPin {
+  id: string;
+  family_id: string;
+  created_by: string;
+  name: string;
+  lat: number;
+  lng: number;
+  created_at: string;
+}
