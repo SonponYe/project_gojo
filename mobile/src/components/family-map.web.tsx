@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SIGNAL_LABEL } from '../lib/device-signals';
-import type { MemberWithLocation } from '../lib/database.types';
+import type { MapPin, MemberWithLocation } from '../lib/database.types';
 import { batteryColor, batteryPercent, freshnessOf, pinColorFor, timeAgo } from '../lib/format';
 import { Avatar, StatusDot } from './badges';
 import { Palette } from './ui';
@@ -13,7 +13,12 @@ interface Props {
   selectedId: string | null;
   onSelect: (userId: string) => void;
   sosUserIds: Set<string>;
+  pins: MapPin[];
+  selectedPinId: string | null;
+  onSelectPin: (pinId: string) => void;
   fitToken: number;
+  focusCoord: [number, number] | null;
+  focusToken: number;
 }
 
 /**
@@ -21,7 +26,16 @@ interface Props {
  * real map. Enough to exercise the data flow (realtime locations, pin cards,
  * SOS) in a browser; use a device build for the actual map.
  */
-export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds }: Props) {
+export function FamilyMap({
+  roster,
+  myId,
+  selectedId,
+  onSelect,
+  sosUserIds,
+  pins,
+  selectedPinId,
+  onSelectPin,
+}: Props) {
   const withLoc = roster.filter((m) => m.location);
   return (
     <View style={styles.wrap}>
@@ -30,6 +44,20 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds }: Pr
         <Text style={styles.noticeText}>Map view is native-only, showing a list on web.</Text>
       </View>
       <ScrollView contentContainerStyle={styles.list}>
+        {pins.map((p) => (
+          <View
+            key={p.id}
+            style={[styles.row, selectedPinId === p.id && styles.rowSelected]}
+            onTouchEnd={() => onSelectPin(p.id)}>
+            <View style={styles.flagAvatar}>
+              <Ionicons name="flag" size={18} color={Palette.brand} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.name}>{p.name}</Text>
+              <Text style={styles.meta}>Dropped {timeAgo(p.created_at)}</Text>
+            </View>
+          </View>
+        ))}
         {withLoc.map((m) => {
           const isMe = m.user.id === myId;
           const loc = m.location!;
@@ -95,6 +123,14 @@ const styles = StyleSheet.create({
   },
   rowSelected: { borderWidth: 2, borderColor: Palette.brand },
   rowSos: { borderWidth: 2, borderColor: Palette.danger },
+  flagAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Palette.brandSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   name: { fontWeight: '800', color: Palette.text },
   meta: { color: Palette.textDim, fontSize: 12, marginTop: 2 },
 });

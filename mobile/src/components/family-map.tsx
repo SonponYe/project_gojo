@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -9,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Config } from '../lib/config';
-import type { MemberWithLocation } from '../lib/database.types';
+import type { MapPin, MemberWithLocation } from '../lib/database.types';
 import { boundsOf } from '../lib/geo';
 import { batteryColor, batteryPercent, freshnessOf, pinColorFor, timeAgo } from '../lib/format';
 import { Avatar, StatusDot } from './badges';
@@ -32,8 +33,15 @@ interface Props {
   onSelect: (userId: string) => void;
   /** user ids with an active SOS — their pin pulses red (spec §10.3) */
   sosUserIds: Set<string>;
+  /** shared dropped waypoints */
+  pins: MapPin[];
+  selectedPinId: string | null;
+  onSelectPin: (pinId: string) => void;
   /** bump this to re-fit the camera to everyone */
   fitToken: number;
+  /** set together to fly the camera to one point (e.g. picked from a list) */
+  focusCoord: [number, number] | null;
+  focusToken: number;
 }
 
 /** Spec §10.3 — an expanding red ring under a pin while its owner has an SOS out. */
@@ -49,7 +57,19 @@ function SosPulse() {
   return <Animated.View pointerEvents="none" style={[styles.pulse, style]} />;
 }
 
-export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds, fitToken }: Props) {
+export function FamilyMap({
+  roster,
+  myId,
+  selectedId,
+  onSelect,
+  sosUserIds,
+  pins,
+  selectedPinId,
+  onSelectPin,
+  fitToken,
+  focusCoord,
+  focusToken,
+}: Props) {
   const cameraRef = useRef<import('@maplibre/maplibre-react-native').CameraRef>(null);
 
   const points = useMemo(
@@ -72,7 +92,15 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds, fitT
         duration: 600,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [box, points.length, fitToken]);
+
+  // Fly to a single point on request (e.g. picked from the people list).
+  useEffect(() => {
+    if (!cameraRef.current || !focusCoord || focusToken === 0) return;
+    cameraRef.current.flyTo({ center: focusCoord, zoom: 16, duration: 500 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusToken]);
 
   if (!MapLibre) {
     return (
@@ -89,6 +117,23 @@ export function FamilyMap({ roster, myId, selectedId, onSelect, sosUserIds, fitT
   return (
     <Map style={StyleSheet.absoluteFill} mapStyle={Config.mapStyleUrl} logo={false}>
       <Camera ref={cameraRef} />
+      {pins.map((p) => (
+        <Marker
+          key={`pin:${p.id}`}
+          lngLat={[p.lng, p.lat]}
+          anchor="bottom"
+          onPress={() => onSelectPin(p.id)}>
+          <View style={styles.pin}>
+            <View style={[styles.flagRow, selectedPinId === p.id && styles.pinSelected]}>
+              <Ionicons name="flag" size={14} color={Palette.brand} />
+              <Text numberOfLines={1} style={styles.pinLabel}>
+                {p.name}
+              </Text>
+            </View>
+            <View style={styles.pinStem} />
+          </View>
+        </Marker>
+      ))}
       {roster.map((m) => {
         if (!m.location) return null;
         const color = pinColorFor(m.user.id);
@@ -164,6 +209,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 999,
     maxWidth: 200,
+    ...Platform.select({
+      android: { elevation: 4 },
+      default: {
+        shadowColor: '#000',
+        shadowOpacity: 0.18,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+      },
+    }),
+  },
+  flagRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#fff',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    maxWidth: 160,
+    borderWidth: 1,
+    borderColor: Palette.brandSoft,
     ...Platform.select({
       android: { elevation: 4 },
       default: {
